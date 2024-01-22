@@ -16,4 +16,9 @@ struct Args {
     new: Option<String>,
 }
 
+// 1. Check if the paths are valid.
+// 2. Check if you want to create a new path. If so check that the path does not exist and create
+//    it.
+// 3. Give to the library files only two valid path which it can work with directly.
+// 4. Return the correspondent errors if neccesary.
 fn main() {}

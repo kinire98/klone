@@ -6,9 +6,9 @@ pub struct Error {
 }
 pub enum ErrorKind {
     DirectoryDoesNotExist(String),
+    InvalidOption(String),
     ErrorReadingFS,
     OperationAbortedByUser,
-    InvalidOption,
 }
 
 impl Display for Error {
@@ -17,11 +17,11 @@ impl Display for Error {
             ErrorKind::DirectoryDoesNotExist(msg) => {
                 write!(f, "The directory you indicated ({}) does not exist.", msg)
             }
+            ErrorKind::InvalidOption(msg) => write!(f, "The option you wrote is invalid: {}", msg),
             ErrorKind::ErrorReadingFS => {
                 write!(f, "An external error happened")
             }
             ErrorKind::OperationAbortedByUser => write!(f, "The user ended the operation"),
-            ErrorKind::InvalidOption => write!(f, "The option you wrote is invalid. Aborting."),
         }
     }
 }
@@ -31,11 +31,11 @@ impl Debug for Error {
             ErrorKind::DirectoryDoesNotExist(msg) => {
                 write!(f, "The directory you indicated ({}) does not exist.", msg)
             }
+            ErrorKind::InvalidOption(msg) => write!(f, "The option you wrote is invalid: {}", msg),
             ErrorKind::ErrorReadingFS => {
                 write!(f, "An external error happened")
             }
             ErrorKind::OperationAbortedByUser => write!(f, "The user ended the operation"),
-            ErrorKind::InvalidOption => write!(f, "The option you wrote is invalid. Aborting."),
         }
     }
 }

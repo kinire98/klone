@@ -16,6 +16,7 @@ struct Args {
     /// The directory where you want to store the backup
     target_dir: PathBuf,
     /// Indicates if a new directory should be created
+    #[arg(short, long)]
     new: bool,
 }
 
@@ -38,7 +39,7 @@ fn main() -> Result<()> {
         }
         Err(_) => {
             return Err(Error {
-                kind: ErrorKind::ErrorReadingFS,
+                kind: ErrorKind::FSError,
             })
         }
     }
@@ -90,13 +91,13 @@ fn main() -> Result<()> {
         },
         Err(_) => {
             return Err(Error {
-                kind: ErrorKind::ErrorReadingFS,
+                kind: ErrorKind::FSError,
             })
         }
     }
 
     // In this point we have two directories we know for a fact that exist
-
+    klone::backup(args.origin_dir, args.target_dir)?;
     Ok(())
 }
 
@@ -104,7 +105,7 @@ fn create_dir(path: &str) -> Result<()> {
     match fs::create_dir_all(path) {
         Ok(_) => Ok(()),
         Err(_) => Err(Error {
-            kind: ErrorKind::ErrorReadingFS,
+            kind: ErrorKind::FSError,
         }),
     }
 }

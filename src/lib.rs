@@ -1,5 +1,9 @@
 mod app;
+
 pub mod error;
-pub use app::backup;
+
 mod sys;
-pub use sys::compare_creation_time;
+
+pub use app::backup;
+
+pub use sys::should_be_backed;

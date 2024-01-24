@@ -1,5 +1,5 @@
 use crate::error::*;
-use crate::sys::should_be_backed;
+
 #[cfg(unix)]
 use crate::sys::unix::*;
 use fs_extra::copy_items;

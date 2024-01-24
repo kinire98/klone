@@ -1,5 +1,5 @@
 use crate::error::*;
-
+use crate::sys::should_be_backed;
 #[cfg(unix)]
 use crate::sys::unix::*;
 use fs_extra::copy_items;
@@ -14,22 +14,20 @@ use std::path::{Path, PathBuf};
 
 pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
     let path_target_dir: Box<Path> = target_dir.clone().into();
-    if let None = path_target_dir.read_dir().unwrap().next() {
-        /*match std::fs::copy(origin_dir, target_dir) {
+    if path_target_dir.read_dir().unwrap().next().is_none() {
+        let dir: Box<Path> = origin_dir.into();
+        match copy_items(&[dir], target_dir, &fs_extra::dir::CopyOptions::default()) {
             Ok(_) => return Ok(()),
             Err(_) => {
                 return Err(Error {
                     kind: ErrorKind::FSError,
                 })
             }
-        }*/
-        let path: Box<Path> = origin_dir.into();
-        let _ = copy_items(&[path], target_dir, &fs_extra::dir::CopyOptions::default()).unwrap();
-        return Ok(());
+        }
     }
 
     // Some testing :)
-    /*println!("origin_dir: {} ", origin_dir.display());
+    println!("origin_dir: {} ", origin_dir.display());
     println!("target_dir: {} ", target_dir.display());
     println!(
         "Should be backed: {}",
@@ -37,6 +35,6 @@ pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
             <PathBuf as TryInto<OsType>>::try_into(origin_dir).unwrap(),
             <PathBuf as TryInto<OsType>>::try_into(target_dir).unwrap()
         )
-    );*/
+    );
     Ok(())
 }

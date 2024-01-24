@@ -1,5 +1,3 @@
-use crate::error::{Error, ErrorKind};
-
 pub fn should_be_backed(file_to_backup: impl File, already_backed_file: impl File) -> bool {
     #[cfg(windows)]
     if file_to_backup.is_folder() {
@@ -19,8 +17,9 @@ trait File {
 }
 #[cfg(windows)]
 pub mod windows {
+    use crate::error::{Error, ErrorKind};
     use std::fs;
-    use std::os::windows::MetadataExt;
+    use std::os::windows::prelude::MetadataExt;
     use std::path::{Path, PathBuf};
 
     pub struct WindowsFileTime {
@@ -36,7 +35,7 @@ pub mod windows {
         }
     }
     impl TryFrom<PathBuf> for WindowsFileTime {
-        type Error = Error;
+        type Error = crate::error::Error;
         fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
             let path: Box<Path> = value.into();
             let metadata = match fs::metadata(value) {
@@ -56,6 +55,7 @@ pub mod windows {
 }
 #[cfg(unix)]
 pub mod unix {
+    use crate::error::{Error, ErrorKind};
     use std::fs;
     use std::os::unix::fs::MetadataExt;
     use std::path::PathBuf;
@@ -71,8 +71,8 @@ pub mod unix {
         fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
             match fs::metadata(value) {
                 Ok(file_metadata) => Ok(UnixFileTime(file_metadata.mtime())),
-                Err(_) => Err(super::Error {
-                    kind: super::ErrorKind::FSError,
+                Err(_) => Err(Error {
+                    kind: ErrorKind::FSError,
                 }),
             }
         }

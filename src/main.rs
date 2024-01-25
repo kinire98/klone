@@ -1,5 +1,5 @@
 use std::{
-    fs,
+    env, fs,
     io::{self, Write},
     path::PathBuf,
 };
@@ -27,6 +27,8 @@ struct Args {
 // 4. Return the correspondent errors if neccesary.
 fn main() -> Result<()> {
     let args = Args::parse();
+    color_eyre::install().unwrap();
+    env::set_var("RUST_BACKTRACE", "full");
     println!("{:?}", args);
     match args.origin_dir.try_exists() {
         Ok(exists) => {

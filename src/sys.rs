@@ -1,4 +1,7 @@
 pub fn should_be_backed(file_to_backup: impl File, already_backed_file: impl File) -> bool {
+    if already_backed_file.just_created() {
+        return true;
+    }
     #[cfg(windows)]
     if file_to_backup.is_folder() {
         return true;
@@ -12,6 +15,7 @@ pub fn should_be_backed(file_to_backup: impl File, already_backed_file: impl Fil
 }
 trait File {
     fn get_time(&self) -> i128;
+    fn just_created(&self) -> bool;
     #[cfg(windows)]
     fn is_folder(&self) -> bool;
 }
@@ -25,6 +29,7 @@ pub mod windows {
     pub struct WindowsFileTime {
         time: u64,
         is_folder: bool,
+        just_created: bool,
     }
     impl super::File for WindowsFileTime {
         fn get_time(&self) -> i128 {
@@ -32,6 +37,9 @@ pub mod windows {
         }
         fn is_folder(&self) -> bool {
             self.is_folder
+        }
+        fn just_created(&self) -> bool {
+            self.just_created
         }
     }
     impl TryFrom<PathBuf> for WindowsFileTime {
@@ -56,24 +64,43 @@ pub mod windows {
 #[cfg(unix)]
 pub mod unix {
     use crate::error::{Error, ErrorKind};
+    use fs_extra::dir::create_all;
     use std::fs;
+    use std::io;
     use std::os::unix::fs::MetadataExt;
     use std::path::PathBuf;
-    pub struct UnixFileTime(i64);
+    pub struct UnixFileTime {
+        creation_time: i64,
+        just_created: bool,
+    }
     impl super::File for UnixFileTime {
         fn get_time(&self) -> i128 {
-            self.0 as i128
+            self.creation_time as i128
+        }
+        fn just_created(&self) -> bool {
+            self.just_created
         }
     }
-    // Maybe change from PathBuf to another structure
     impl TryFrom<PathBuf> for UnixFileTime {
         type Error = crate::error::Error;
         fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
-            match fs::metadata(value) {
-                Ok(file_metadata) => Ok(UnixFileTime(file_metadata.mtime())),
-                Err(_) => Err(Error {
-                    kind: ErrorKind::FSError,
+            match fs::metadata(&value) {
+                Ok(file_metadata) => Ok(UnixFileTime {
+                    creation_time: file_metadata.mtime(),
+                    just_created: false,
                 }),
+                Err(err) => match err.kind() {
+                    io::ErrorKind::NotFound => {
+                        create_all(&value, false).unwrap();
+                        Ok(UnixFileTime {
+                            creation_time: fs::metadata(&value).unwrap().mtime(),
+                            just_created: true,
+                        })
+                    }
+                    _ => Err(Error {
+                        kind: ErrorKind::FSError,
+                    }),
+                },
             }
         }
     }

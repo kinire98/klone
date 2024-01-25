@@ -1,19 +1,13 @@
 use crate::error::*;
-use crate::sys::should_be_backed;
-#[cfg(unix)]
-use crate::sys::unix::*;
+
 use fs_extra::copy_items;
-#[cfg(unix)]
-type OsType = UnixFileTime;
-#[cfg(windows)]
-use crate::sys::windows::*;
-#[cfg(windows)]
-type OsType = WindowsFileTime;
 
 use std::path::{Path, PathBuf};
 
 pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
     let path_target_dir: Box<Path> = target_dir.clone().into();
+    // If the target directory is empty is not worth checking the times
+    // Just copy it directly
     if path_target_dir.read_dir().unwrap().next().is_none() {
         let dir: Box<Path> = origin_dir.into();
         match copy_items(&[dir], target_dir, &fs_extra::dir::CopyOptions::default()) {
@@ -25,16 +19,16 @@ pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
             }
         }
     }
-
-    // Some testing :)
-    println!("origin_dir: {} ", origin_dir.display());
-    println!("target_dir: {} ", target_dir.display());
-    println!(
-        "Should be backed: {}",
-        should_be_backed(
-            <PathBuf as TryInto<OsType>>::try_into(origin_dir).unwrap(),
-            <PathBuf as TryInto<OsType>>::try_into(target_dir).unwrap()
-        )
-    );
+    start_backup(origin_dir, target_dir)?;
     Ok(())
 }
+
+fn start_backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
+    origin_dir
+        .read_dir()
+        .unwrap()
+        .into_iter()
+        .for_each(|sub_dir| operations::backup_operations(sub_dir, target_dir.clone()).unwrap());
+    Ok(())
+}
+mod operations;

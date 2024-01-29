@@ -4,6 +4,8 @@ use fs_extra::copy_items;
 
 use std::path::{Path, PathBuf};
 
+mod operations;
+
 pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
     let path_target_dir: Box<Path> = target_dir.clone().into();
     // If the target directory is empty is not worth checking the times
@@ -19,16 +21,8 @@ pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
             }
         }
     }
-    start_backup(origin_dir, target_dir)?;
+    let _ = origin_dir.read_dir().unwrap().into_iter().map(|sub_dir| {
+        Ok::<(), Error>(operations::backup_operations(sub_dir, target_dir.clone())?)
+    });
     Ok(())
 }
-
-fn start_backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
-    origin_dir
-        .read_dir()
-        .unwrap()
-        .into_iter()
-        .for_each(|sub_dir| operations::backup_operations(sub_dir, target_dir.clone()).unwrap());
-    Ok(())
-}
-mod operations;

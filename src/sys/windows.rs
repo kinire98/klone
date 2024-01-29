@@ -26,7 +26,7 @@ impl TryFrom<PathBuf> for WindowsFileTime {
         let metadata = match fs::metadata(value) {
             Ok(time) => time,
             Err(err) => match err.kind() {
-                io::ErrorKind::NotFound => todo!(),
+                std::io::ErrorKind::NotFound => todo!(),
                 _ => {
                     return Err(Error {
                         kind: ErrorKind::FSError,

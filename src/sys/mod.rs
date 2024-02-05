@@ -6,11 +6,6 @@ pub fn should_be_backed(file_to_backup: impl File, already_backed_file: impl Fil
     if file_to_backup.is_folder() {
         return true;
     }
-    println!(
-        "{} > {}",
-        file_to_backup.get_time(),
-        already_backed_file.get_time()
-    );
     file_to_backup.get_time() > already_backed_file.get_time()
 }
 trait File {

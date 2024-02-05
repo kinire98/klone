@@ -29,7 +29,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
     color_eyre::install().unwrap();
     env::set_var("RUST_BACKTRACE", "full");
-    env::set_var("COLORBT_SHOW_HIDDEN", "1");
+    //env::set_var("COLORBT_SHOW_HIDDEN", "1");
     println!("{:?}", args);
     match args.origin_dir.try_exists() {
         Ok(exists) => {

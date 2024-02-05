@@ -19,10 +19,10 @@ impl super::File for WindowsFileTime {
         self.just_created
     }
 }
-impl TryFrom<PathBuf> for WindowsFileTime {
+impl TryFrom<&PathBuf> for WindowsFileTime {
     type Error = crate::error::Error;
-    fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
-        let path: Box<Path> = value.clone().into();
+    fn try_from(value: &PathBuf) -> Result<Self, Self::Error> {
+        let path: Box<Path> = value.into();
         let metadata = match fs::metadata(value) {
             Ok(time) => time,
             Err(err) => match err.kind() {

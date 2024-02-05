@@ -5,11 +5,11 @@ klone is a simple backup tool that saves the most recent copy of your files. If 
 ```
 The objectives of this application:
 As a user: make simple backups with the most recent copy of the files and access them in a simple way through the OS fs, without the need to use an external app:
-1. Iterate through the directories.  
-2. Get the times of modification of each file in the directory of origin directory.  
-3. Get the times of modification of each file in the directory of target directory.  
-4. Compare both. If the origin directory time is greater than the target directory time that means that there were some changes, so it's neccessary to make a backup.  
-5. If a directory or a file doesn't exist in the target directory it will be created.  
+1. Iterate through the directories.  (DONE)
+2. Get the times of modification of each file in the directory of origin directory.  (DONE)
+3. Get the times of modification of each file in the directory of target directory.  (DONE)
+4. Compare both. If the origin directory time is greater than the target directory time that means that there were some changes, so it's neccessary to make a backup.  (DONE)
+5. If a directory or a file doesn't exist in the target directory it will be created.  (DONE)
 6. If a directory or a file no longer exists in the origin directory two options: if nothing is addressed for this, it will just leave it there or you can delete it.  
 7. All of this will be created in the most recent directory of the backup directory.
 
@@ -32,3 +32,6 @@ You can tell the application to create a new directory so you can store the hist
 - Make an option to exclude directories
 - An option to store the configuration in a configuration file, so you don't have to indicate the paths or the exclusions all the time. (Maybe with a [tui](https://docs.rs/tui/latest/tui)). It will also be useful to show progress
 - A way to make differential and incremental backups. This is improbable because it defeats the purpose of the application.
+## TODOS
+- Add behaviour for Windows when file or dir doesn't exist
+- Change transfer of ownership to reference passing to avoid clones and improve performance time and memory wise

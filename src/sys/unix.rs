@@ -16,9 +16,9 @@ impl super::File for UnixFileTime {
         self.just_created
     }
 }
-impl TryFrom<PathBuf> for UnixFileTime {
+impl TryFrom<&PathBuf> for UnixFileTime {
     type Error = crate::error::Error;
-    fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
+    fn try_from(value: &PathBuf) -> Result<Self, Self::Error> {
         match fs::metadata(&value) {
             Ok(file_metadata) => Ok(UnixFileTime {
                 creation_time: file_metadata.mtime(),

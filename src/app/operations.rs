@@ -30,8 +30,8 @@ pub fn backup_operations(
     // We check if the directory should be backed and if its a directory
     match (
         should_be_backed(
-            <PathBuf as TryInto<OsType>>::try_into(dir.path()).unwrap(),
-            <PathBuf as TryInto<OsType>>::try_into(target_file.clone()).unwrap(),
+            <&PathBuf as TryInto<OsType>>::try_into(&dir.path()).unwrap(),
+            <&PathBuf as TryInto<OsType>>::try_into(&target_file).unwrap(),
         ),
         dir.path().is_dir(),
     ) {

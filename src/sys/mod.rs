@@ -1,4 +1,7 @@
-pub fn should_be_backed(file_to_backup: impl File, already_backed_file: impl File) -> bool {
+pub fn should_be_backed<T>(file_to_backup: T, already_backed_file: T) -> bool
+where
+    T: File,
+{
     if already_backed_file.just_created() {
         return true;
     }

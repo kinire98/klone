@@ -35,3 +35,4 @@ You can tell the application to create a new directory so you can store the hist
 ## TODOS
 - Add behaviour for Windows when file or dir doesn't exist
 - Change transfer of ownership to reference passing to avoid clones and improve performance time and memory wise
+- Some test, especially a integration one

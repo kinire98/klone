@@ -1,6 +1,8 @@
 /target
 Cargo.lock
+# Directories used for testing the application
 /origin_dir
 /target_dir
-/origin_dir
 /get
+# The configuration files for the app
+/config

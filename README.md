@@ -31,7 +31,7 @@ You can tell the application to create a new directory so you can store the hist
 ## Maybes
 - Make an option to exclude directories
 - An option to store the configuration in a configuration file, so you don't have to indicate the paths or the exclusions all the time. (Maybe with a [tui](https://docs.rs/tui/latest/tui)). It will also be useful to show progress
-- A way to make differential and incremental backups. This is improbable because it defeats the purpose of the application.
+- Multithreading support
 ## TODOS
 - Add behaviour for Windows when file or dir doesn't exist
 - Change transfer of ownership to reference passing to avoid clones and improve performance time and memory wise

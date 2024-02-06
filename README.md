@@ -10,10 +10,8 @@ As a user: make simple backups with the most recent copy of the files and access
 3. Get the times of modification of each file in the directory of target directory.  (DONE)
 4. Compare both. If the origin directory time is greater than the target directory time that means that there were some changes, so it's neccessary to make a backup.  (DONE)
 5. If a directory or a file doesn't exist in the target directory it will be created.  (DONE)
-6. If a directory or a file no longer exists in the origin directory two options: if nothing is addressed for this, it will just leave it there or you can delete it.  
-7. All of this will be created in the most recent directory of the backup directory.
 
-The directory structure will be like this 
+The directory structure is intended to be something like this (is up to you to maintain a correct file structure):
 ```
 |
  \_ backup_dir
@@ -29,10 +27,11 @@ A backup app that will store the most recent version of you files.
 You indicate a directory and inside that directory a copy will be created. If you don't say the opposite it will be in the same directory.  
 You can tell the application to create a new directory so you can store the history of your file.  
 ## Maybes
-- Make an option to exclude directories
-- An option to store the configuration in a configuration file, so you don't have to indicate the paths or the exclusions all the time. (Maybe with a [tui](https://docs.rs/tui/latest/tui)). It will also be useful to show progress
+- An option to store the configuration in a configuration file, so you don't have to indicate the paths or the exclusions all the time. (Maybe with a [tui](https://docs.rs/tui/latest/tui)). It will also be useful to show progress. As the project progress I see this option more viable to not bloat the program with lots of arguments
 - Multithreading support
 ## TODOS
+- Exclusions and configurations stored in files
 - Add behaviour for Windows when file or dir doesn't exist
 - Change transfer of ownership to reference passing to avoid clones and improve performance time and memory wise
-- Some test, especially a integration one
+- Some tests, especially a integration one
+- Look for unwraps and change them for proper error handling. If can't be done, use expect.

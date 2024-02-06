@@ -12,12 +12,22 @@ use klone::error::*;
 #[command(author, version, about)]
 struct Args {
     /// The directory where the files to backup are
-    origin_dir: PathBuf,
+    origin_dir: Option<PathBuf>,
     /// The directory where you want to store the backup
-    target_dir: PathBuf,
+    target_dir: Option<PathBuf>,
     /// Indicates if a new directory should be created
-    #[arg(short, long)]
+    #[arg(short = 'n', long)]
     new: bool,
+    /// Add an exclusion so the files that match with it won't be backed up. Be cautious: this
+    /// exclusions are global
+    #[arg(short = 'e', long)]
+    exclude: bool,
+    /// Show all the exclusions you added
+    #[arg(short = 'l', long)]
+    list_exclusions: bool,
+    /// Remove a previously added exclusion.
+    #[arg(short = 'r', long)]
+    remove_exclusion: bool,
 }
 
 // 1. Check if the paths are valid.
@@ -31,10 +41,48 @@ fn main() -> Result<()> {
     env::set_var("RUST_BACKTRACE", "full");
     //env::set_var("COLORBT_SHOW_HIDDEN", "1");
     println!("{:?}", args);
-    match args.origin_dir.try_exists() {
+    // ! This is gonna change when added defaults
+    match (
+        args.exclude,
+        args.list_exclusions,
+        args.remove_exclusion,
+        args.origin_dir.is_some(), // If this call returns false,
+        args.target_dir.is_some(), // it's imposible that this returns true
+    ) {
+        // Start backup
+        (false, false, false, true, true) => backup_option(args)?,
+        // Start backup without valid paths provided
+        (false, false, false, _, _) => Err(Error { kind: ErrorKind::InvalidOption("You must specify two valid paths if you don't provide arguments for exclusions of defaults".to_string()) })?,
+        // Add exclusion
+        (true, false, false, true, false) => klone::config::exclusions::add_exclusion(
+            &args.origin_dir.expect("This message should never appear"),
+        )?,
+        // Add exclusion without a pattern to store
+        (true, false, false, false, _) => Err(Error { kind: ErrorKind::InvalidOption("You must provide a pattern to add to the stored exclusions".to_string()) })?,
+        // Add exclusion with conflicting arguments
+        (true, _, _, _, _) => Err(Error { kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()) })?,
+        // List exclusions
+        (false, true, false, false, false) => klone::config::exclusions::list_exclusions()?,
+        // List exclusions with conflicting arguments
+        (_, true, _, _, _) => Err(Error { kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()) })?,
+        // Delete exclusion
+        (false, false, true, true, false) => {
+            let deleted_exclusion = klone::config::exclusions::remove_exclusion(&args.origin_dir.expect("This message should never appear"))?;
+            println!("You deleted the following exclusion: \n {}", deleted_exclusion);
+        },
+        // Delete exclusion without a pattern
+        (false, false, true, false, _) => Err(Error { kind: ErrorKind::InvalidOption("You must provide a pattern to delete from the stored exclusions".to_string()) })?,
+        // Delete exclusion with conflicting arguments
+        (_, _, true, true, _) => Err(Error { kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()) })?,
+    }
+    Ok(())
+}
+
+fn backup_option(args: Args) -> Result<()> {
+    match args.origin_dir.as_ref().unwrap().try_exists() {
         Ok(exists) => {
             if !exists {
-                let path = args.origin_dir.display().to_string();
+                let path = args.origin_dir.as_ref().unwrap().display().to_string();
                 return Err(Error {
                     kind: ErrorKind::DirectoryDoesNotExist(path),
                 });
@@ -46,7 +94,7 @@ fn main() -> Result<()> {
             })
         }
     }
-    match args.target_dir.try_exists() {
+    match args.target_dir.as_ref().unwrap().try_exists() {
         Ok(exists) => match (args.new, exists) {
             // The target directory exists and it is told to create it.
             // Aborts because it can be the case that there is a backup or other data in that
@@ -57,7 +105,7 @@ fn main() -> Result<()> {
                 })
             }
             // The directory doesn't exist and the program is told to create it
-            (true, false) => create_dir(args.target_dir.to_str().unwrap())?,
+            (true, false) => create_dir(args.target_dir.as_ref().unwrap())?,
             // The directory doesn't exist and the user hasn't asked to create it
             // It prompts if the user wants to create it.
             // If so, and there aren't any errors the execution continues as normal
@@ -72,7 +120,7 @@ fn main() -> Result<()> {
                 println!("{:?}", input);
                 match input.as_str() {
                     "y" | "Y" | "" => {
-                        create_dir(args.target_dir.to_str().unwrap())?;
+                        create_dir(args.target_dir.as_ref().unwrap())?;
                     }
                     "n" | "N" => {
                         return Err(Error {
@@ -100,11 +148,14 @@ fn main() -> Result<()> {
     }
 
     // In this point we have two directories we know for a fact that exist
-    klone::backup(args.origin_dir, args.target_dir)?;
+    klone::backup(args.origin_dir.unwrap(), args.target_dir.unwrap())?;
     Ok(())
 }
 
-fn create_dir(path: &str) -> Result<()> {
+fn create_dir<T>(path: T) -> Result<()>
+where
+    T: AsRef<std::path::Path>,
+{
     match fs::create_dir_all(path) {
         Ok(_) => Ok(()),
         Err(_) => Err(Error {

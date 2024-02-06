@@ -10,7 +10,7 @@ fn main() {
             std::fs::write(
                 &path,
                 format!(
-                    "{} {:?}:{:?}, {:?}:{:?} {}",
+                    "{} {:?}:{:?}, {:?}:{:?} {}\n",
                     "{", "origin", "", "target", "", "}"
                 ),
             )
@@ -18,7 +18,7 @@ fn main() {
         }
         let path = path.parent().unwrap().join("exclusions.json");
         if !path.exists() {
-            std::fs::write(&path, "[]").unwrap();
+            std::fs::write(&path, "[]\n").unwrap();
         }
     }
 }

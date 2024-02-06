@@ -1,4 +1,4 @@
-use std::{error, fmt::Debug, fmt::Display};
+use std::{error, fmt::{Debug, Display}};
 
 pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug)]
@@ -9,6 +9,8 @@ pub struct Error {
 pub enum ErrorKind {
     DirectoryDoesNotExist(String),
     InvalidOption(String),
+    InvalidPattern(String),
+    JSONParsingError(String),
     TargetDirMTimeHigherThanOriginDir,
     FSError,
     OperationAbortedByUser,
@@ -29,7 +31,9 @@ impl Display for Error {
                 write!(f, 
                     "The directory where you want to store the backup has a modification time lower than the directory of origin for the backup.\n This means that you modified some data in thetarget directory after the last time you changed some data in the directory of origin."
                     )
-            }
+            },
+            ErrorKind::InvalidPattern(invalid_pattern) => write!(f, "The file pattern you introduced to exclude: \n{}\nis not valid", invalid_pattern),
+            ErrorKind::JSONParsingError(exclusions_or_configuration) => write!(f, "There was a problem parsing the file with the {}", exclusions_or_configuration),
         }
     }
 }

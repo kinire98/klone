@@ -6,23 +6,20 @@ type OsType = UnixFileTime;
 use crate::sys::windows::*;
 #[cfg(windows)]
 type OsType = WindowsFileTime;
+use crate::config::exclusions::is_excluded;
 use crate::error;
 use crate::sys::*;
 use std::fs::create_dir_all;
 use std::{fs::DirEntry, io, path::PathBuf};
+
 pub fn backup_operations(
     dir: Result<DirEntry, io::Error>,
     target_dir: PathBuf,
 ) -> Result<(), crate::error::Error> {
     // Extract the value from the result
-    let dir = match dir {
-        Ok(value) => value,
-        Err(_) => {
-            return Err(error::Error {
-                kind: error::ErrorKind::FSError,
-            })
-        }
-    };
+    let dir = dir.map_err(|_| error::Error {
+        kind: error::ErrorKind::FSError,
+    })?;
     let path_to_target_file = target_dir.clone();
     // Add the path to the target directory
     let target_file = path_to_target_file.join(dir.file_name());
@@ -38,23 +35,27 @@ pub fn backup_operations(
         (false, _) => Ok(()),
         // Should be backed and is a file. We copy the file and return
         (true, false) => {
+            if is_excluded(dir.path().display().to_string().as_str())? {
+                print!("{}", termion::clear::CurrentLine);
+                println!("{} is excluded. Skipping", dir.path().display());
+                return Ok(());
+            }
+            print!("{}", termion::clear::CurrentLine);
+            println!("{} is being copied", dir.path().display());
             // Copy contents
             let _ = create_dir_all(&path_to_target_file);
-            match fs_extra::file::copy(
+            fs_extra::file::copy(
                 dir.path(),
                 target_file,
                 &fs_extra::file::CopyOptions {
                     overwrite: true,
                     ..Default::default()
                 },
-            ) {
-                Ok(_) => Ok(()),
-                Err(_) => {
-                    return Err(error::Error {
-                        kind: error::ErrorKind::FSError,
-                    });
-                }
-            }
+            )
+            .map_err(|_| error::Error {
+                kind: error::ErrorKind::FSError,
+            })?;
+            Ok(())
         }
         // If should be backed and is a directory we check inside the directory for files to be
         // backed
@@ -62,7 +63,7 @@ pub fn backup_operations(
             //Check inside directory
             super::start_backup(
                 dir.path(),
-                target_file.join(dir.path().ancestors().last().unwrap()),
+                target_file.join(dir.path().ancestors().last().expect("Should not panic")),
             )?;
             Ok(())
         }

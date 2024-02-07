@@ -11,9 +11,12 @@ pub enum ErrorKind {
     InvalidOption(String),
     InvalidPattern(String),
     JSONParsingError(String),
+    JSONStringifyingError(String),
     TargetDirMTimeHigherThanOriginDir,
     FSError,
+    IOError,
     OperationAbortedByUser,
+    PatternAlreadyExist,
 }
 
 impl Display for Error {
@@ -23,7 +26,10 @@ impl Display for Error {
                 write!(f, "The directory you indicated ({}) does not exist.", msg)
             }
             ErrorKind::InvalidOption(msg) => write!(f, "The option you wrote is invalid: {}", msg),
-            ErrorKind::FSError => {
+            ErrorKind::JSONParsingError(exclusions_or_configuration) => write!(f, "There was a problem parsing the file with the {}", exclusions_or_configuration),
+            ErrorKind::JSONStringifyingError(exclusions_or_configuration) => write!(f, "An error occured storing the {}", exclusions_or_configuration),
+            ErrorKind::InvalidPattern(invalid_pattern) => write!(f, "The file pattern you introduced to exclude: \n{}\nis not valid", invalid_pattern),
+            ErrorKind::FSError | ErrorKind::IOError => {
                 write!(f, "An external error happened")
             }
             ErrorKind::OperationAbortedByUser => write!(f, "The user ended the operation"),
@@ -32,8 +38,7 @@ impl Display for Error {
                     "The directory where you want to store the backup has a modification time lower than the directory of origin for the backup.\n This means that you modified some data in thetarget directory after the last time you changed some data in the directory of origin."
                     )
             },
-            ErrorKind::InvalidPattern(invalid_pattern) => write!(f, "The file pattern you introduced to exclude: \n{}\nis not valid", invalid_pattern),
-            ErrorKind::JSONParsingError(exclusions_or_configuration) => write!(f, "There was a problem parsing the file with the {}", exclusions_or_configuration),
+            ErrorKind::PatternAlreadyExist => write!(f, "The pattern you introduced already exists"),
         }
     }
 }

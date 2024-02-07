@@ -1,9 +1,10 @@
 use crate::error::*;
 
-use fs_extra::copy_items;
-
 use std::path::{Path, PathBuf};
 
+use self::initial_copy::initial_copy;
+
+mod initial_copy;
 mod operations;
 
 pub fn backup(origin_dir: PathBuf, mut target_dir: PathBuf) -> Result<()> {
@@ -12,15 +13,7 @@ pub fn backup(origin_dir: PathBuf, mut target_dir: PathBuf) -> Result<()> {
     // Just copy it directly
 
     if path_target_dir.read_dir().unwrap().next().is_none() {
-        let dir: Box<Path> = origin_dir.into();
-        match copy_items(&[dir], target_dir, &fs_extra::dir::CopyOptions::default()) {
-            Ok(_) => return Ok(()),
-            Err(_) => {
-                return Err(Error {
-                    kind: ErrorKind::FSError,
-                })
-            }
-        }
+        initial_copy(origin_dir, target_dir);
     }
     target_dir.push(origin_dir.ancestors().next().unwrap());
     start_backup(origin_dir, target_dir)?;

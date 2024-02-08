@@ -1,5 +1,7 @@
 use std::{
-    env, fs,
+    env,
+    fmt::format,
+    fs,
     io::{self, Write},
     path::PathBuf,
 };
@@ -76,8 +78,22 @@ fn main() -> Result<()> {
 }
 
 fn backup_option(args: Args) -> Result<()> {
-    let origin_dir = PathBuf::from(args.origin_dir.expect("This should not panic"));
-    let target_dir = PathBuf::from(args.target_dir.expect("This should not panic"));
+    let origin_dir = args.origin_dir.expect("This should not panic");
+    let origin_dir = if origin_dir == ".".to_string() {
+        std::env::current_dir().map_err(|_| Error {
+            kind: ErrorKind::UndefinedError,
+        })?
+    } else {
+        PathBuf::from(origin_dir)
+    };
+    let target_dir = args.target_dir.expect("This should not panic");
+    let target_dir = if target_dir == ".".to_string() {
+        std::env::current_dir().map_err(|_| Error {
+            kind: ErrorKind::UndefinedError,
+        })?
+    } else {
+        PathBuf::from(target_dir)
+    };
     match origin_dir.try_exists() {
         Ok(exists) => {
             if !exists {

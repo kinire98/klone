@@ -17,6 +17,7 @@ pub enum ErrorKind {
     IOError,
     OperationAbortedByUser,
     PatternAlreadyExist,
+    UndefinedError,
 }
 
 impl Display for Error {
@@ -39,6 +40,7 @@ impl Display for Error {
                     )
             },
             ErrorKind::PatternAlreadyExist => write!(f, "The pattern you introduced already exists"),
+            ErrorKind::UndefinedError => write!(f, "An undefined error has ocurred"),
         }
     }
 }

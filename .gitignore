@@ -6,3 +6,5 @@ Cargo.lock
 /get
 # The configuration files for the app
 /config
+# The cache folder of the app
+/cache

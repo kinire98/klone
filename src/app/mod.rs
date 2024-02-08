@@ -13,7 +13,7 @@ pub fn backup(origin_dir: PathBuf, mut target_dir: PathBuf) -> Result<()> {
     // Just copy it directly
 
     if path_target_dir.read_dir().unwrap().next().is_none() {
-        initial_copy(origin_dir, target_dir);
+        return initial_copy(origin_dir, target_dir);
     }
     target_dir.push(origin_dir.ancestors().next().unwrap());
     start_backup(origin_dir, target_dir)?;

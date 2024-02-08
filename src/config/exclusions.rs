@@ -17,7 +17,8 @@ pub fn is_excluded(pattern: &str) -> Result<bool> {
         kind: ErrorKind::FSError,
     })?;
     // Deserialize the json
-    let deserialized: Exclusions = serde_json::from_str(&file_contents).unwrap();
+    let deserialized: Exclusions =
+        serde_json::from_str(&file_contents).expect("Should be valid JSON");
     let mut iter = deserialized.0.iter().filter(|file| {
         Pattern::new(file.as_str())
             .expect("This should't panic") // The pattern was already checked when added

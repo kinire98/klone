@@ -11,7 +11,7 @@ where
     }
     file_to_backup.get_time() > already_backed_file.get_time()
 }
-trait File {
+pub trait File {
     fn get_time(&self) -> i128;
     fn just_created(&self) -> bool;
     #[cfg(windows)]

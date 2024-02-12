@@ -19,16 +19,16 @@ impl super::File for UnixFileTime {
 impl TryFrom<&PathBuf> for UnixFileTime {
     type Error = crate::error::Error;
     fn try_from(value: &PathBuf) -> Result<Self, Self::Error> {
-        match fs::metadata(&value) {
+        match fs::metadata(value) {
             Ok(file_metadata) => Ok(UnixFileTime {
                 creation_time: file_metadata.mtime(),
                 just_created: false,
             }),
             Err(err) => match err.kind() {
                 io::ErrorKind::NotFound => {
-                    create_all(&value, false).unwrap();
+                    create_all(value, false).unwrap();
                     Ok(UnixFileTime {
-                        creation_time: fs::metadata(&value).unwrap().mtime(),
+                        creation_time: fs::metadata(value).unwrap().mtime(),
                         just_created: true,
                     })
                 }

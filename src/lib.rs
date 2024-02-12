@@ -9,3 +9,5 @@ pub use app::backup;
 pub use sys::should_be_backed;
 
 pub mod config;
+
+mod output;

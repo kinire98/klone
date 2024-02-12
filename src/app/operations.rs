@@ -24,6 +24,9 @@ pub fn backup_operations(
     // Add the path to the target directory
     let target_file = path_to_target_file.join(dir.file_name());
     // We check if the directory should be backed and if its a directory
+    if is_excluded(dir.path().display().to_string().as_str())? {
+        return Ok(());
+    }
     match (
         should_be_backed(
             <&PathBuf as TryInto<OsType>>::try_into(&dir.path()).unwrap(),
@@ -35,15 +38,7 @@ pub fn backup_operations(
         (false, _) => Ok(()),
         // Should be backed and is a file. We copy the file and return
         (true, false) => {
-            if is_excluded(dir.path().display().to_string().as_str())? {
-                print!("{}", termion::clear::CurrentLine);
-                println!("{} is excluded. Skipping", dir.path().display());
-                return Ok(());
-            }
-            print!("{}", termion::clear::CurrentLine);
-            println!("{} is being copied", dir.path().display());
             // Copy contents
-            let _ = create_dir_all(&path_to_target_file);
             fs_extra::file::copy(
                 dir.path(),
                 target_file,
@@ -61,6 +56,7 @@ pub fn backup_operations(
         // backed
         (true, true) => {
             //Check inside directory
+            let _ = create_dir_all(&path_to_target_file);
             super::start_backup(
                 dir.path(),
                 target_file.join(dir.path().ancestors().last().expect("Should not panic")),

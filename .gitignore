@@ -8,3 +8,6 @@ Cargo.lock
 /config
 # The cache folder of the app
 /cache
+test
+test2
+test3

@@ -3,6 +3,7 @@ use std::io::{self, Write};
 use crate::error::*;
 use glob::Pattern;
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Exclusions(Vec<String>);
@@ -13,7 +14,7 @@ pub fn is_excluded(pattern: &str) -> Result<bool> {
         .join("config")
         .join("exclusions.json");
     // Get the file contents
-    let file_contents = std::fs::read_to_string(&exclusions_file).map_err(|_| Error {
+    let file_contents = std::fs::read_to_string(exclusions_file).map_err(|_| Error {
         kind: ErrorKind::FSError,
     })?;
     // Deserialize the json
@@ -117,7 +118,7 @@ pub fn remove_exclusion() -> Result<()> {
     let rest_of_values: Vec<&String> = binding
         .0
         .iter()
-        .filter(|stored_pattern| *stored_pattern != &pattern)
+        .filter(|stored_pattern| *stored_pattern != pattern)
         .collect();
     // Write to disc
     let _ = std::fs::write(
@@ -128,14 +129,13 @@ pub fn remove_exclusion() -> Result<()> {
     );
     // Checks if some exclusion was deleted
     // If rest of values len is less than the binding len something has veen removed
-    if rest_of_values.len() == binding.0.len() {
-        println!("No exclusion was deleted. Make sure you wrote it right");
-    } else if rest_of_values.len() < binding.0.len() {
-        println!("The following exclusion has been removed: {}", pattern);
-        println!("These are the remaining exclusions:");
-        list_exclusions()?;
-    } else {
-        println!("WTF!? How did you get here?");
+    match rest_of_values.len().cmp(&binding.0.len()) {
+        Ordering::Equal => println!("No exclusion was deleted. Make sure you wrote it right"),
+        Ordering::Less => {
+            println!("The following exclusion has been removed: {}", pattern);
+            println!("These are the remaining exclusions:");
+        }
+        Ordering::Greater => println!("WTF!? How did you get here?"),
     }
     Ok(())
 }

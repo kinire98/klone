@@ -143,6 +143,22 @@ fn backup_option(args: Args) -> Result<()> {
             })
         }
     }
+    let origin_dir = origin_dir.canonicalize().unwrap();
+    let target_dir = target_dir.canonicalize().unwrap();
+    if target_dir
+        .ancestors()
+        .filter(|ancestor| {
+            println!("{}", ancestor.display());
+            println!("{}", origin_dir.display());
+            ancestor == &origin_dir.as_path()
+        })
+        .next()
+        .is_some()
+    {
+        Err(Error {
+            kind: ErrorKind::TargetDirInsideOrigin,
+        })?;
+    }
 
     // In this point we have two directories we know for a fact that exist
     klone::backup(origin_dir, target_dir)?;

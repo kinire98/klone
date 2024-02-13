@@ -30,7 +30,6 @@ You can tell the application to create a new directory so you can store the hist
 - An option to store the configuration in a configuration file, so you don't have to indicate the paths or the exclusions all the time. (Maybe with a [tui](https://docs.rs/tui/latest/tui)). It will also be useful to show progress. As the project progress I see this option more viable to not bloat the program with lots of arguments
 - Multithreading support
 ## Urgents
-- Check if the target directory is inside the origin one. If so, panic
 ## TODOS
 - Exclusions and configurations stored in files (also initial copy) -> DONE, only exclusions
 - Manage the cli output in a separate function, to allow concurrency

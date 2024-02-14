@@ -134,6 +134,7 @@ pub fn remove_exclusion() -> Result<()> {
         Ordering::Less => {
             println!("The following exclusion has been removed: {}", pattern);
             println!("These are the remaining exclusions:");
+            list_exclusions()?;
         }
         Ordering::Greater => println!("WTF!? How did you get here?"),
     }

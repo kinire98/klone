@@ -1,6 +1,6 @@
 use crate::error::*;
 use crossterm::{cursor, execute, terminal};
-use std::io;
+use std::io::{self, Write};
 use std::{sync::mpsc::Receiver, thread, time::Duration};
 struct Message(String);
 
@@ -15,11 +15,12 @@ pub fn cli(rx: Receiver<String>) -> Result<()> {
             }
             clear_line();
             print!("{} Copying {}", next(loader), message.0);
+            let _ = std::io::stdout().flush();
             loader += 1;
             if loader == 4 {
                 loader = 0;
             }
-            thread::sleep(Duration::from_secs(1));
+            thread::sleep(Duration::from_millis(100));
         }
     });
     Ok(())

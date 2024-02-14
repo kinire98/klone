@@ -147,11 +147,7 @@ fn backup_option(args: Args) -> Result<()> {
     let target_dir = target_dir.canonicalize().unwrap();
     if target_dir
         .ancestors()
-        .filter(|ancestor| {
-            println!("{}", ancestor.display());
-            println!("{}", origin_dir.display());
-            ancestor == &origin_dir.as_path()
-        })
+        .filter(|ancestor| ancestor == &origin_dir.as_path())
         .next()
         .is_some()
     {

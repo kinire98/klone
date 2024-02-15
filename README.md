@@ -33,7 +33,7 @@ You can tell the application to create a new directory so you can store the hist
 ## TODOS
 - Exclusions and configurations stored in files (also initial copy) -> DONE, only exclusions
 - Manage the cli output in a separate function, to allow concurrency
-- Add behaviour for Windows when file or dir doesn't exist -> cacache and tokio
+- Add behaviour for Windows when file or dir doesn't exist -> cacache
 - Change transfer of ownership to reference passing to avoid clones and improve performance time and memory wise
 - Some tests, especially a integration one
-- Look for unwraps and change them for proper error handling. If can't be done, use expect.
+- Look for unwraps and change them for proper error handling. If can't be done, use expect. -> Done

@@ -1,13 +1,3 @@
 /target
-Cargo.lock
-# Directories used for testing the application
-/origin_dir
-/target_dir
-/get
-# The configuration files for the app
-/config
-# The cache folder of the app
-/cache
-test
-test2
-test3
+# For tests passing in Github
+build.rs

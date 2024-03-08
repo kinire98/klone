@@ -22,7 +22,7 @@ impl super::File for WindowsFileTime {
 impl TryFrom<&PathBuf> for WindowsFileTime {
     type Error = crate::error::Error;
     fn try_from(value: &PathBuf) -> Result<Self, Self::Error> {
-        let path: Box<Path> = *value.clone().into();
+        let path: Box<Path> = <PathBuf as Into<T>>::into(value.clone());
         let metadata = match fs::metadata(value) {
             Ok(time) => time,
             Err(err) => match err.kind() {

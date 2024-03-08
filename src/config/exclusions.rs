@@ -4,17 +4,17 @@ use crate::error::*;
 use glob::Pattern;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
+#[cfg(unix)]
+const EXCLUSIONS_PATH: &str = "/etc/klone/exclusions.json";
+#[cfg(windows)]
+const EXCLUSIONS_PATH: &str = "/etc/klone/exclusions.json";
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Exclusions(Vec<String>);
 
 pub fn is_excluded(pattern: &str) -> Result<bool> {
-    let exclusions_file = std::env::current_dir()
-        .unwrap()
-        .join("config")
-        .join("exclusions.json");
     // Get the file contents
-    let file_contents = std::fs::read_to_string(exclusions_file).map_err(|_| Error {
+    let file_contents = std::fs::read_to_string(EXCLUSIONS_PATH).map_err(|_| Error {
         kind: ErrorKind::FSError,
     })?;
     // Deserialize the json
@@ -29,15 +29,11 @@ pub fn is_excluded(pattern: &str) -> Result<bool> {
     Ok(iter.next().is_some())
 }
 pub fn add_exclusion() -> Result<()> {
-    let exclusions_file = std::env::current_dir()
-        .unwrap()
-        .join("config")
-        .join("exclusions.json");
     // Get the already existing exclusions
     let binding = get_pattern("Add the pattern to exclude: ")?;
     let pattern = binding.as_str();
     let mut deserialized: Exclusions = serde_json::from_str(
-        &std::fs::read_to_string(&exclusions_file).map_err(|_| Error {
+        &std::fs::read_to_string(EXCLUSIONS_PATH).map_err(|_| Error {
             kind: ErrorKind::FSError,
         })?,
     )
@@ -60,7 +56,7 @@ pub fn add_exclusion() -> Result<()> {
     deserialized.0.push(pattern.to_string());
     // Write it to the file
     let _ = std::fs::write(
-        exclusions_file,
+        EXCLUSIONS_PATH,
         serde_json::to_string(&deserialized).map_err(|_| Error {
             kind: ErrorKind::JSONStringifyingError("exclusions".to_string()),
         })?,
@@ -71,15 +67,9 @@ pub fn add_exclusion() -> Result<()> {
     Ok(())
 }
 pub fn list_exclusions() -> Result<()> {
-    let exclusions_file = std::env::current_dir()
-        .map_err(|_| Error {
-            kind: ErrorKind::FSError,
-        })?
-        .join("config")
-        .join("exclusions.json");
     let mut counter = 1;
     // Read file and print it
-    serde_json::from_str::<Exclusions>(&std::fs::read_to_string(exclusions_file).map_err(
+    serde_json::from_str::<Exclusions>(&std::fs::read_to_string(EXCLUSIONS_PATH).map_err(
         |_| Error {
             kind: ErrorKind::FSError,
         },
@@ -96,17 +86,11 @@ pub fn list_exclusions() -> Result<()> {
     Ok(())
 }
 pub fn remove_exclusion() -> Result<()> {
-    let exclusions_file = std::env::current_dir()
-        .map_err(|_| Error {
-            kind: ErrorKind::FSError,
-        })?
-        .join("config")
-        .join("exclusions.json");
     // Binding for getting the info from the file and make the borrow checher happy
     let binding = get_pattern("Introduce the pattern to remove: ")?;
     let pattern = binding.as_str();
     let binding = serde_json::from_str::<Exclusions>(
-        &std::fs::read_to_string(&exclusions_file).map_err(|_| Error {
+        &std::fs::read_to_string(EXCLUSIONS_PATH).map_err(|_| Error {
             kind: ErrorKind::FSError,
         })?,
     )
@@ -122,7 +106,7 @@ pub fn remove_exclusion() -> Result<()> {
         .collect();
     // Write to disc
     let _ = std::fs::write(
-        &exclusions_file,
+        EXCLUSIONS_PATH,
         serde_json::to_string(&rest_of_values).map_err(|_| Error {
             kind: ErrorKind::JSONStringifyingError("exclsions".to_string()),
         })?,

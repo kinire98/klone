@@ -2,6 +2,10 @@ use std::path::PathBuf;
 
 use crate::error::Result;
 
+#[cfg(unix)]
+const DEFAULTS_PATH: &str = "/etc/klone/defaults.json";
+#[cfg(windows)]
+const DEFAULTS_PATH: &str = "/etc/klone/defaults.json";
 pub struct Defaults {
     origin: PathBuf,
     target: PathBuf,

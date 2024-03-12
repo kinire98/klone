@@ -5,7 +5,7 @@ use crate::error::Result;
 #[cfg(unix)]
 const DEFAULTS_PATH: &str = "/etc/klone/defaults.json";
 #[cfg(windows)]
-const DEFAULTS_PATH: &str = "/etc/klone/defaults.json";
+const DEFAULTS_PATH: &str = "C:\\ProgramData\\klone\\exclusions.json";
 pub struct Defaults {
     origin: PathBuf,
     target: PathBuf,

@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 #[cfg(unix)]
 const EXCLUSIONS_PATH: &str = "/etc/klone/exclusions.json";
 #[cfg(windows)]
-const EXCLUSIONS_PATH: &str = "/etc/klone/exclusions.json";
+const EXCLUSIONS_PATH: &str = "C:\\ProgramData\\klone\\exclusions.json";
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Exclusions(Vec<String>);

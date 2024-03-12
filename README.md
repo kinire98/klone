@@ -3,6 +3,9 @@ klone is a simple backup tool that saves the most recent copy of your files. If 
 ```bash
 (sudo) klone origin_dir target_dir
 ```
+## Disclaimer 
+_Disclaimer: This repository does not contain the `build.rs` file. So don' try to build from source unless you want to make the `build.rs`. It's way better to just do `cargo install klone`_
+## App objectives
 The objectives of this application:
 As a user: make simple backups with the most recent copy of the files and access them in a simple way through the OS fs, without the need to use an external app:
 1. Iterate through the directories.  (DONE)

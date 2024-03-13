@@ -8,9 +8,9 @@ use std::process::Command;
 #[cfg(windows)]
 fn main() {
     let program_data = PathBuf::from("C:\\ProgramData\\klone");
-    fs::create_dir_all(&program_data);
-    fs::write(program_data.join("exclusion.json"), "[]");
-    fs::write(
+    let _ = fs::create_dir_all(&program_data);
+    let _ = fs::write(program_data.join("exclusion.json"), "[]");
+    let _ = fs::write(
         program_data.join("defaults.json"),
         format!(
             "{} {:?}:{:?}, {:?}:{:?} {}\n",

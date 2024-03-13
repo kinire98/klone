@@ -1,7 +1,7 @@
 use crate::error::{Error, ErrorKind};
 use std::fs;
 use std::os::windows::prelude::MetadataExt;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub struct WindowsFileTime {
     time: u64,
@@ -22,7 +22,6 @@ impl super::File for WindowsFileTime {
 impl TryFrom<&PathBuf> for WindowsFileTime {
     type Error = crate::error::Error;
     fn try_from(value: &PathBuf) -> Result<Self, Self::Error> {
-        let path: Box<Path> = <PathBuf as Into<T>>::into(value.clone());
         let metadata = match fs::metadata(value) {
             Ok(time) => time,
             Err(err) => match err.kind() {
@@ -36,7 +35,7 @@ impl TryFrom<&PathBuf> for WindowsFileTime {
         };
         Ok(WindowsFileTime {
             time: metadata.last_write_time(),
-            is_folder: path.is_dir(),
+            is_folder: value.is_dir(),
             just_created: false,
         })
     }

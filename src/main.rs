@@ -13,14 +13,14 @@ use klone::error::*;
 struct Args {
     /// The directory where the files to backup are
     #[arg(short, long, name = "The directory of the files to backup")]
-    origin_dir: Option<String>,
+    origin_dir: Option<PathBuf>,
     /// The directory where you want to store the backup
     #[arg(
         short,
         long,
         name = "The directory where the backup is going to be stored"
     )]
-    target_dir: Option<String>,
+    target_dir: Option<PathBuf>,
     /// Indicates if a new directory should be created
     #[arg(short = 'n', long)]
     new: bool,
@@ -34,6 +34,14 @@ struct Args {
     /// Remove a previously added exclusion.
     #[arg(short = 'r', long)]
     remove_exclusion: bool,
+    /// Add, change or remove a default path.
+    /// It will prompt if it's the target or the origin
+    /// Leave it empty, to delete it
+    #[arg(short, long, name = "The directory for the default")]
+    defaults: Option<PathBuf>,
+    /// It will show the default paths
+    #[arg(short, long)]
+    show_defaults: bool,
 }
 
 // 1. Check if the paths are valid.
@@ -51,32 +59,67 @@ fn main() -> Result<()> {
         args.exclude,
         args.list_exclusions,
         args.remove_exclusion,
+        args.show_defaults,
+        args.defaults.is_some(),
         args.origin_dir.is_some(), // If this call returns false,
         args.target_dir.is_some(), // it's imposible that this returns true
     ) {
         // Start backup
-        (false, false, false, true, true) => backup_option(args)?,
         // Start backup without valid paths provided
-        (false, false, false, _, _) => Err(Error { kind: ErrorKind::InvalidOption("You must specify two valid paths if you don't provide arguments for exclusions of defaults".to_string()) })?,
+        (false, false, false, false, false, _, _) => backup_option(args)?,
         // Add exclusion
-        (true, false, false, false, false) => klone::config::exclusions::add_exclusion()?,
+        (true, false, false, false, false, false, false) => {
+            klone::config::exclusions::add_exclusion()?
+        }
         // Add exclusion with conflicting arguments
-        (true, _, _, _, _) => Err(Error { kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()) })?,
+        (true, _, _, _, _, _, _) => Err(Error {
+            kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()),
+        })?,
         // List exclusions
-        (false, true, false, false, false) => klone::config::exclusions::list_exclusions()?,
+        (false, true, false, false, false, false, false) => {
+            klone::config::exclusions::list_exclusions()?
+        }
         // List exclusions with conflicting arguments
-        (_, true, _, _, _) => Err(Error { kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()) })?,
+        (_, true, _, _, _, _, _) => Err(Error {
+            kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()),
+        })?,
         // Delete exclusion
-        (false, false, true, false, false) => klone::config::exclusions::remove_exclusion()?,
+        (false, false, true, false, false, false, false) => {
+            klone::config::exclusions::remove_exclusion()?
+        }
         // Delete exclusion with conflicting arguments
-        (_, _, true, _, _) => Err(Error { kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()) })?,
+        (_, _, true, _, _, _, _) => Err(Error {
+            kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()),
+        })?,
+        (false, false, false, false, true, false, false) => {
+            klone::config::defaults::set_defaults()?
+        }
+        (_, _, _, _, true, _, _) => Err(Error {
+            kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()),
+        })?,
+        (false, false, false, true, false, false, false) => {
+            klone::config::defaults::print_defaults()?
+        }
+        (_, _, _, true, _, _, _) => Err(Error {
+            kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()),
+        })?,
     }
     Ok(())
 }
 
 fn backup_option(args: Args) -> Result<()> {
-    let origin_dir = PathBuf::from(args.origin_dir.expect("This should not panic"));
-    let target_dir = PathBuf::from(args.target_dir.expect("This should not panic"));
+    let origin_dir = if args.origin_dir.is_some() {
+        args.origin_dir
+            .expect("Won't panic, already checked for it to exist")
+    } else {
+        klone::config::defaults::get_default_origin()?
+    };
+    let target_dir = if args.target_dir.is_some() {
+        args.target_dir
+            .expect("Won't panic, already checked for it to exist")
+    } else {
+        klone::config::defaults::get_default_target()?
+    };
     match origin_dir.try_exists() {
         Ok(exists) => {
             if !exists {
@@ -143,13 +186,16 @@ fn backup_option(args: Args) -> Result<()> {
             })
         }
     }
+    // Checks if the target directory is inside the origin one.
+    // This is forbidden because it will create infinite recursion
     let origin_dir = origin_dir.canonicalize().unwrap();
     let target_dir = target_dir.canonicalize().unwrap();
+    // Takes ancestors of the target directory and checks them against
+    // its ancestors. If one of them is equal to the origin directory
+    // it returns an error
     if target_dir
         .ancestors()
-        .filter(|ancestor| ancestor == &origin_dir.as_path())
-        .next()
-        .is_some()
+        .any(|ancestor| ancestor == origin_dir.as_path())
     {
         Err(Error {
             kind: ErrorKind::TargetDirInsideOrigin,

@@ -28,9 +28,9 @@ fn main() {
     if PathBuf::from("/etc/klone/").is_dir() {
         return;
     }
-    let _ = Command::new("sudo").args(&["mkdir", "/etc/klone"]).output();
+    let _ = Command::new("sudo").args(["mkdir", "/etc/klone"]).output();
     let _ = Command::new("sudo")
-        .args(&["chmod", "-R", "777", "/etc/klone/"])
+        .args(["chmod", "-R", "777", "/etc/klone/"])
         .output();
     let _ = fs::write("/etc/klone/exclusions.json", "[]");
     let _ = fs::write(

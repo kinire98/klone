@@ -1,7 +1,4 @@
 use std::fs;
-// /etc/klone
-//
-// TODO FINISH THE CREATION OF CONFIG FILES
 use std::path::PathBuf;
 #[cfg(unix)]
 use std::process::Command;

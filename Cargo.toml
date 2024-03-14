@@ -6,6 +6,7 @@ description = "A backup application based in the same FS that will only back the
 authors = ["kinire98"]
 readme = "README.md"
 license-file = "LICENSE.md"
+repository = "https://github.com/kinire98/klone"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

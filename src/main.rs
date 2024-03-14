@@ -91,9 +91,9 @@ fn main() -> Result<()> {
         (_, _, true, _, _, _, _) => Err(Error {
             kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()),
         })?,
-        (false, false, false, false, true, false, false) => {
-            klone::config::defaults::set_defaults()?
-        }
+        (false, false, false, false, true, false, false) => klone::config::defaults::set_defaults(
+            args.defaults.expect("Already checked for it to exist"),
+        )?,
         (_, _, _, _, true, _, _) => Err(Error {
             kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()),
         })?,

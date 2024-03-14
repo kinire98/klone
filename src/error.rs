@@ -10,6 +10,7 @@ pub enum ErrorKind {
     InvalidPattern(String),
     JSONParsingError(String),
     JSONStringifyingError(String),
+    NotADirectory(String),
     TargetDirMTimeHigherThanOriginDir,
     FSError,
     IOError,
@@ -29,6 +30,7 @@ impl Display for Error {
             ErrorKind::JSONParsingError(exclusions_or_configuration) => write!(f, "There was a problem parsing the file with the {}", exclusions_or_configuration),
             ErrorKind::JSONStringifyingError(exclusions_or_configuration) => write!(f, "An error occured storing the {}", exclusions_or_configuration),
             ErrorKind::InvalidPattern(invalid_pattern) => write!(f, "The file pattern you introduced to exclude: \n{}\nis not valid", invalid_pattern),
+            ErrorKind::NotADirectory(path) => write!(f, "The path you provided `{}` is a file when it should be a directory", path),
             ErrorKind::FSError | ErrorKind::IOError => {
                 write!(f, "An external error happened")
             }
@@ -54,6 +56,7 @@ impl Debug for Error {
             ErrorKind::JSONParsingError(exclusions_or_configuration) => write!(f, "There was a problem parsing the file with the {}", exclusions_or_configuration),
             ErrorKind::JSONStringifyingError(exclusions_or_configuration) => write!(f, "An error occured storing the {}", exclusions_or_configuration),
             ErrorKind::InvalidPattern(invalid_pattern) => write!(f, "The file pattern you introduced to exclude: \n{}\nis not valid", invalid_pattern),
+            ErrorKind::NotADirectory(path) => write!(f, "The path you provided `{}` is a file when it should be a directory", path),
             ErrorKind::FSError | ErrorKind::IOError => {
                 write!(f, "An external error happened")
             }

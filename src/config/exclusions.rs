@@ -7,7 +7,10 @@ use std::cmp::Ordering;
 #[cfg(unix)]
 const EXCLUSIONS_PATH: &str = "/etc/klone/exclusions.json";
 #[cfg(windows)]
-const EXCLUSIONS_PATH: &str = "C:\\ProgramData\\klone\\exclusions.json";
+const EXCLUSIONS_PATH: &str = r"C:\ProgramData\klone\exclusions.json";
+
+#[cfg(windows)]
+const SYS_EXCLUSIONS: &[&str] = &["*/.git", "*.o", "*.bin", "*.lock"];
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Exclusions(Vec<String>);
@@ -88,6 +91,13 @@ pub fn list_exclusions() -> Result<()> {
 pub fn remove_exclusion() -> Result<()> {
     // Binding for getting the info from the file and make the borrow checher happy
     let binding = get_pattern("Introduce the pattern to remove: ")?;
+    #[cfg(windows)]
+    if SYS_EXCLUSIONS.contains(&binding.as_str()) {
+        println!(
+            "You can't remove the .git exclusion in Windows, because an issue with the permissions"
+        );
+        return Ok(());
+    }
     let pattern = binding.as_str();
     let binding = serde_json::from_str::<Exclusions>(
         &std::fs::read_to_string(EXCLUSIONS_PATH).map_err(|_| Error {
@@ -132,6 +142,8 @@ fn get_pattern(message: &str) -> Result<String> {
     io::stdin().read_line(&mut input).map_err(|_| Error {
         kind: ErrorKind::IOError,
     })?;
+    input.pop();
+    #[cfg(windows)]
     input.pop();
     Ok(input)
 }

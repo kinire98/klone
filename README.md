@@ -33,4 +33,4 @@ You can tell the application to create a new directory so you can store the hist
 ## TODOS
 - Some tests, especially a integration one
 - Look for unwraps and change them for proper error handling. If can't be done, use expect.
-
+añsdlkfj

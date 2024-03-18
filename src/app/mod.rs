@@ -17,7 +17,6 @@ pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
         return initial_copy(origin_dir, target_dir);
     }
     let target_dir = target_dir.join(origin_dir.iter().last().expect("Temporary"));
-    println!("{:?}", target_dir);
     backup_preparations(origin_dir, target_dir)?;
     Ok(())
 }

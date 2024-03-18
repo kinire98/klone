@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(unix)]
 const DEFAULTS_PATH: &str = "/etc/klone/defaults.json";
 #[cfg(windows)]
-const DEFAULTS_PATH: &str = "C:\\ProgramData\\klone\\exclusions.json";
+const DEFAULTS_PATH: &str = r"C:\ProgramData\klone\defaults.json";
 #[derive(Serialize, Deserialize, Debug)]
 struct Defaults {
     origin: PathBuf,
@@ -42,6 +42,8 @@ pub fn set_defaults(path: PathBuf) -> Result<()> {
     io::stdin()
         .read_line(&mut input)
         .expect("An error has happened");
+    input.pop();
+    #[cfg(windows)]
     input.pop();
     let mut defaults = self::get_defaults()?;
     match input.as_str() {

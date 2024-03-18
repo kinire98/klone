@@ -6,12 +6,12 @@ use std::path::PathBuf;
 use std::sync::mpsc::{self, Receiver, Sender};
 
 struct Wrapper;
-//mpl Drop for Wrapper {
-//   fn drop(&mut self) {
-//       crate::output::clear_line();
-//       println!("Backup finished");
-//   }
-//
+impl Drop for Wrapper {
+    fn drop(&mut self) {
+        crate::output::clear_line();
+        println!("Backup finished");
+    }
+}
 
 pub fn initial_copy(origin_dir: PathBuf, mut target_dir: PathBuf) -> Result<(), Error> {
     target_dir.push(origin_dir.iter().next_back().unwrap());

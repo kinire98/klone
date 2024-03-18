@@ -1,6 +1,7 @@
 use crate::error::{Error, ErrorKind};
+use fs_extra::dir::create_all;
 use std::fs;
-use std::os::windows::prelude::MetadataExt;
+use std::os::windows::prelude::*;
 use std::path::PathBuf;
 
 #[derive(Debug)]
@@ -26,7 +27,14 @@ impl TryFrom<&PathBuf> for WindowsFileTime {
         let metadata = match fs::metadata(value) {
             Ok(time) => time,
             Err(err) => match err.kind() {
-                std::io::ErrorKind::NotFound => todo!(),
+                std::io::ErrorKind::NotFound => {
+                    create_all(value, false).unwrap();
+                    return Ok(WindowsFileTime {
+                        time: fs::metadata(value).unwrap().last_write_time(),
+                        just_created: true,
+                        is_folder: value.is_dir(),
+                    });
+                }
                 _ => {
                     return Err(Error {
                         kind: ErrorKind::FSError,

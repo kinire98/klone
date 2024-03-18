@@ -15,12 +15,12 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::{fs::DirEntry, path::PathBuf};
 
 struct Wrapper;
-//mpl Drop for Wrapper {
-//   fn drop(&mut self) {
-//       crate::output::clear_line();
-//       println!("Backup finished");
-//   }
-//
+impl Drop for Wrapper {
+    fn drop(&mut self) {
+        crate::output::clear_line();
+        println!("Backup finished");
+    }
+}
 
 pub fn backup_preparations(
     origin_dir: PathBuf,
@@ -52,7 +52,6 @@ fn backup_operations(
     target_dir: PathBuf,
     tx: Sender<String>,
 ) -> Result<(), crate::error::Error> {
-    //let diff = pathdiff::diff_paths(&target_dir, &dir.path()).expect("Checked to exist");
     let path_to_target_file = target_dir.clone();
     // Add the path to the target directory
     let target_file = path_to_target_file.join(dir.file_name());
@@ -60,11 +59,13 @@ fn backup_operations(
     if is_excluded(dir.path().display().to_string().as_str())? {
         return Ok(());
     }
-    println!("\n{:?}\n{:?}", dir.path(), target_file);
-    let origin_time = <&PathBuf as TryInto<OsType>>::try_into(&dir.path()).unwrap();
-    let target_time = <&PathBuf as TryInto<OsType>>::try_into(&target_file).unwrap();
     match (
-        should_be_backed(origin_time, target_time),
+        should_be_backed(
+            <&PathBuf as TryInto<OsType>>::try_into(&dir.path())
+                .expect("Shouldn't panic as, file exists. If so, is an external error"),
+            <&PathBuf as TryInto<OsType>>::try_into(&target_file)
+                .expect("Shouldn't panic as, file exists. If so, is an external error"),
+        ),
         dir.path().is_dir(),
     ) {
         // If shouldn't be backed we finish and return
@@ -72,10 +73,10 @@ fn backup_operations(
         // Should be backed and is a file. We copy the file and return
         (true, false) => {
             // Copy contents
-            tx.send(target_file.display().to_string()).unwrap();
-            //.map_err(|_| error::Error {
-            //    kind: error::ErrorKind::IOError,
-            //})?;
+            tx.send(target_file.display().to_string())
+                .map_err(|_| error::Error {
+                    kind: error::ErrorKind::IOError,
+                })?;
             fs_extra::file::copy(
                 dir.path(),
                 target_file,
@@ -84,20 +85,19 @@ fn backup_operations(
                     ..Default::default()
                 },
             )
-            .unwrap();
-            //.map_err(|_| error::Error {
-            //kind: error::ErrorKind::FSError,
-            //})?;
+            .map_err(|_| error::Error {
+                kind: error::ErrorKind::FSError,
+            })?;
             Ok(())
         }
         // If should be backed and is a directory we check inside the directory for files to be
         // backed
         (true, true) => {
             //Check inside directory
-            tx.send(target_file.display().to_string()).unwrap();
-            //.map_err(|_| error::Error {
-            //    kind: error::ErrorKind::IOError,
-            //})?;
+            tx.send(target_file.display().to_string())
+                .map_err(|_| error::Error {
+                    kind: error::ErrorKind::IOError,
+                })?;
             let _ = create_dir_all(&path_to_target_file);
             self::start_backup(dir.path(), target_file, tx)?;
             Ok(())

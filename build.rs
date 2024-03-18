@@ -9,7 +9,10 @@ fn main() {
         return;
     }
     let _ = fs::create_dir_all(&program_data);
-    let _ = fs::write(program_data.join("exclusion.json"), "[]");
+    let _ = fs::write(
+        program_data.join("exclusions.json"),
+        format!("[{:?},{:?},{:?},{:?}]", "*/.git", "*.o", "*.bin", "*.lock"),
+    );
     let _ = fs::write(
         program_data.join("defaults.json"),
         format!(

@@ -31,6 +31,6 @@ You can tell the application to create a new directory so you can store the hist
 - Multithreading support
 ## Urgents
 ## TODOS
-- Exclusions and configurations stored in files (also initial copy) -> DONE, only exclusions
-- Add behaviour for Windows when file or dir doesn't exist -> cacache
+- Some tests, especially a integration one
 - Look for unwraps and change them for proper error handling. If can't be done, use expect.
+

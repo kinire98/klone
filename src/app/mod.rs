@@ -7,6 +7,7 @@ use operations::backup_preparations;
 
 mod initial_copy;
 mod operations;
+mod wrapper;
 
 pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
     let path_target_dir: Box<Path> = target_dir.clone().into();

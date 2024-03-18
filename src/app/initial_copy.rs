@@ -5,18 +5,10 @@ use std::fs::DirEntry;
 use std::path::PathBuf;
 use std::sync::mpsc::{self, Receiver, Sender};
 
-struct Wrapper;
-impl Drop for Wrapper {
-    fn drop(&mut self) {
-        crate::output::clear_line();
-        println!("Backup finished");
-    }
-}
-
 pub fn initial_copy(origin_dir: PathBuf, mut target_dir: PathBuf) -> Result<(), Error> {
     target_dir.push(origin_dir.iter().next_back().unwrap());
     let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
-    let _wrap = Wrapper;
+    let _wrap = super::wrapper::Wrapper;
     cli(rx)?;
     start_initial_copy(origin_dir, target_dir, tx)
 }

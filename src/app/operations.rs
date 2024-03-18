@@ -13,21 +13,12 @@ use crate::sys::*;
 use std::fs::create_dir_all;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::{fs::DirEntry, path::PathBuf};
-
-struct Wrapper;
-impl Drop for Wrapper {
-    fn drop(&mut self) {
-        crate::output::clear_line();
-        println!("Backup finished");
-    }
-}
-
 pub fn backup_preparations(
     origin_dir: PathBuf,
     target_dir: PathBuf,
 ) -> Result<(), crate::error::Error> {
     let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
-    let _wrap = Wrapper;
+    let _wrap = super::wrapper::Wrapper;
     cli(rx)?;
     start_backup(origin_dir, target_dir, tx)
 }

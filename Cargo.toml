@@ -1,6 +1,6 @@
 [package]
 name = "klone"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 description = "A backup application based in the same FS that will only back the file that you changed"
 authors = ["kinire98"]

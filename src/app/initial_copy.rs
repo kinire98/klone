@@ -5,9 +5,18 @@ use std::fs::DirEntry;
 use std::path::PathBuf;
 use std::sync::mpsc::{self, Receiver, Sender};
 
+struct Wrapper;
+//mpl Drop for Wrapper {
+//   fn drop(&mut self) {
+//       crate::output::clear_line();
+//       println!("Backup finished");
+//   }
+//
+
 pub fn initial_copy(origin_dir: PathBuf, mut target_dir: PathBuf) -> Result<(), Error> {
     target_dir.push(origin_dir.iter().next_back().unwrap());
     let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
+    let _wrap = Wrapper;
     cli(rx)?;
     start_initial_copy(origin_dir, target_dir, tx)
 }
@@ -17,18 +26,21 @@ fn start_initial_copy(
     tx: Sender<String>,
 ) -> Result<(), Error> {
     for child in std::fs::read_dir(origin_dir).unwrap() {
-        copy_operations(child, target_dir.clone(), tx.clone())?;
+        copy_operations(
+            child.map_err(|_| Error {
+                kind: ErrorKind::IOError,
+            })?,
+            target_dir.clone(),
+            tx.clone(),
+        )?;
     }
     Ok(())
 }
 fn copy_operations(
-    origin_dir: Result<DirEntry, std::io::Error>,
+    origin_dir: DirEntry,
     target_dir: PathBuf,
     tx: Sender<String>,
 ) -> Result<(), Error> {
-    let origin_dir = origin_dir.map_err(|_| Error {
-        kind: ErrorKind::FSError,
-    })?;
     let path_target_dir = target_dir.clone();
     let target_dir = path_target_dir.join(origin_dir.file_name());
     if is_excluded(origin_dir.path().display().to_string().as_str())? {

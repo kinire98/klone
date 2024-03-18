@@ -36,17 +36,11 @@ fn next(phase: i8) -> char {
         '\\'
     }
 }
-fn clear_line() {
+pub fn clear_line() {
     execute!(
         io::stdout(),
         terminal::Clear(terminal::ClearType::CurrentLine),
         cursor::MoveToColumn(0)
     )
     .unwrap();
-}
-impl Drop for Message {
-    fn drop(&mut self) {
-        clear_line();
-        println!("Backup finished");
-    }
 }

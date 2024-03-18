@@ -3,6 +3,7 @@ use std::fs;
 use std::os::windows::prelude::MetadataExt;
 use std::path::PathBuf;
 
+#[derive(Debug)]
 pub struct WindowsFileTime {
     time: u64,
     is_folder: bool,

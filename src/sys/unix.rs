@@ -4,6 +4,7 @@ use std::fs;
 use std::io;
 use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
+#[derive(Debug)]
 pub struct UnixFileTime {
     creation_time: i64,
     just_created: bool,

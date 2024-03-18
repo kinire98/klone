@@ -111,12 +111,16 @@ fn backup_option(args: Args) -> Result<()> {
     let origin_dir = if args.origin_dir.is_some() {
         args.origin_dir
             .expect("Won't panic, already checked for it to exist")
+            .canonicalize()
+            .expect("Wont' panic")
     } else {
         klone::config::defaults::get_default_origin()?
     };
     let target_dir = if args.target_dir.is_some() {
         args.target_dir
             .expect("Won't panic, already checked for it to exist")
+            .canonicalize()
+            .expect("Won't panic")
     } else {
         klone::config::defaults::get_default_target()?
     };
@@ -188,8 +192,6 @@ fn backup_option(args: Args) -> Result<()> {
     }
     // Checks if the target directory is inside the origin one.
     // This is forbidden because it will create infinite recursion
-    let origin_dir = origin_dir.canonicalize().unwrap();
-    let target_dir = target_dir.canonicalize().unwrap();
     // Takes ancestors of the target directory and checks them against
     // its ancestors. If one of them is equal to the origin directory
     // it returns an error

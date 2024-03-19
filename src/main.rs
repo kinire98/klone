@@ -32,9 +32,9 @@ struct Args {
     remove_exclusion: bool,
     /// Add, change or remove a default path.
     /// It will prompt if it's the target or the origin
-    /// Leave it empty, to delete it
+    /// Write None to delete it
     #[arg(short, long, name = "Default path")]
-    defaults: Option<PathBuf>,
+    defaults: Option<String>,
     /// It will show the default paths
     #[arg(short, long)]
     show_defaults: bool,
@@ -87,9 +87,9 @@ fn main() -> Result<()> {
         (_, _, true, _, _, _, _) => Err(Error {
             kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()),
         })?,
-        (false, false, false, false, true, false, false) => klone::config::defaults::set_defaults(
-            args.defaults.expect("Already checked for it to exist"),
-        )?,
+        (false, false, false, false, true, false, false) => {
+            klone::config::defaults::set_defaults(args.defaults.expect("Already checked to exist"))?
+        }
         (_, _, _, _, true, _, _) => Err(Error {
             kind: ErrorKind::InvalidOption("Conflicting arguments".to_string()),
         })?,

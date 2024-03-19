@@ -26,15 +26,21 @@ pub fn get_default_origin() -> Result<PathBuf> {
 pub fn get_default_target() -> Result<PathBuf> {
     Ok(get_defaults().expect("Temporary").target)
 }
-pub fn set_defaults(path: PathBuf) -> Result<()> {
+pub fn set_defaults(path: String) -> Result<()> {
+    if path == "None" {
+        return write_defaults(PathBuf::new());
+    }
     let absolute_path = std::fs::canonicalize(&path).map_err(|_| Error {
-        kind: ErrorKind::DirectoryDoesNotExist(path.display().to_string()),
+        kind: ErrorKind::DirectoryDoesNotExist(path),
     })?;
     if absolute_path.is_file() {
         Err(Error {
             kind: ErrorKind::NotADirectory(absolute_path.display().to_string()),
         })?
     }
+    write_defaults(absolute_path)
+}
+fn write_defaults(path: PathBuf) -> Result<()> {
     println!("Remember that this configurations are global and affect every user in the computer");
     print!("What is this path for? Target[t]/Origin[o]:");
     let _ = io::stdout().flush();
@@ -49,14 +55,14 @@ pub fn set_defaults(path: PathBuf) -> Result<()> {
     match input.as_str() {
         "t" => {
             defaults = Defaults {
-                target: absolute_path,
+                target: path,
                 origin: defaults.origin,
             }
         }
         "o" => {
             defaults = Defaults {
                 target: defaults.target,
-                origin: absolute_path,
+                origin: path,
             }
         }
         _ => Err(Error {

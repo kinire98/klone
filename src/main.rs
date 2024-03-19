@@ -12,14 +12,10 @@ use klone::error::*;
 #[command(author, version, about)]
 struct Args {
     /// The directory where the files to backup are
-    #[arg(short, long, name = "The directory of the files to backup")]
+    #[arg(short, long, name = "Origin path")]
     origin_dir: Option<PathBuf>,
     /// The directory where you want to store the backup
-    #[arg(
-        short,
-        long,
-        name = "The directory where the backup is going to be stored"
-    )]
+    #[arg(short, long, name = "Target path")]
     target_dir: Option<PathBuf>,
     /// Indicates if a new directory should be created
     #[arg(short = 'n', long)]
@@ -37,7 +33,7 @@ struct Args {
     /// Add, change or remove a default path.
     /// It will prompt if it's the target or the origin
     /// Leave it empty, to delete it
-    #[arg(short, long, name = "The directory for the default")]
+    #[arg(short, long, name = "Default path")]
     defaults: Option<PathBuf>,
     /// It will show the default paths
     #[arg(short, long)]

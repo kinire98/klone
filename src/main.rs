@@ -30,8 +30,8 @@ struct Args {
     /// Remove a previously added exclusion.
     #[arg(short = 'r', long)]
     remove_exclusion: bool,
-    /// Add, change or remove a default path.
-    /// It will prompt if it's the target or the origin
+    /// Add, change or remove a default path.  
+    /// It will prompt if it's the target or the origin.  
     /// Write None to delete it
     #[arg(short, long, name = "Default path")]
     defaults: Option<String>,

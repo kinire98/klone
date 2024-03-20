@@ -2,19 +2,18 @@ use crate::error::*;
 use crossterm::{cursor, execute, terminal};
 use std::io::{self, Write};
 use std::{sync::mpsc::Receiver, thread, time::Duration};
-struct Message(String);
 
 pub fn cli(rx: Receiver<String>) -> Result<()> {
     std::thread::spawn(move || {
         let rx = rx;
-        let mut message = Message(String::new());
+        let mut message = String::new();
         let mut loader = 0;
         loop {
             if let Ok(msg) = rx.try_recv() {
-                message.0 = msg;
+                message = msg;
             }
             clear_line();
-            print!("{} Copying {}", next(loader), message.0);
+            print!("{} Copying {}", next(loader), message);
             let _ = std::io::stdout().flush();
             loader += 1;
             if loader == 4 {

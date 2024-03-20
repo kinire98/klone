@@ -191,6 +191,7 @@ fn backup_option(args: Args) -> Result<()> {
     // Takes ancestors of the target directory and checks them against
     // its ancestors. If one of them is equal to the origin directory
     // it returns an error
+    // It also avoids that the target and origin directory are the same
     if target_dir
         .ancestors()
         .any(|ancestor| ancestor == origin_dir.as_path())

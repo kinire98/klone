@@ -14,10 +14,13 @@ pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
     // If the target directory is empty is not worth checking the times
     // Just copy it directly
 
-    if path_target_dir.read_dir().unwrap().next().is_none() {
+    if !path_target_dir
+        .read_dir()
+        .expect("Temporary")
+        .any(|path| path.expect("Temporary").path() == target_dir)
+    {
         return initial_copy(origin_dir, target_dir);
     }
     let target_dir = target_dir.join(origin_dir.iter().last().expect("Temporary"));
-    backup_preparations(origin_dir, target_dir)?;
-    Ok(())
+    backup_preparations(origin_dir, target_dir)
 }

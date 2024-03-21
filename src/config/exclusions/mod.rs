@@ -15,16 +15,12 @@ const SYS_EXCLUSIONS: &[&str] = &["*/.git", "*.o", "*.bin", "*.lock"];
 #[derive(Serialize, Deserialize, Debug)]
 struct Exclusions(Vec<String>);
 
+mod cache;
+
 pub fn is_excluded(pattern: &str) -> Result<bool> {
-    // Get the file contents
-    let file_contents = std::fs::read_to_string(EXCLUSIONS_PATH).map_err(|_| Error {
-        kind: ErrorKind::FSError,
-    })?;
-    // Deserialize the json
-    let deserialized: Exclusions =
-        serde_json::from_str(&file_contents).expect("Should be valid JSON");
-    let mut iter = deserialized.0.iter().filter(|file| {
-        Pattern::new(file.as_str())
+    let binding = cache::get_exclusions()?;
+    let mut iter = binding.iter().filter(|file| {
+        Pattern::new(file)
             .expect("This should't panic") // The pattern was already checked when added
             .matches(pattern)
     });

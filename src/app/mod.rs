@@ -13,12 +13,20 @@ pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
     let path_target_dir: Box<Path> = target_dir.clone().into();
     // If the target directory is empty is not worth checking the times
     // Just copy it directly
-
     if !path_target_dir
         .read_dir()
         .expect("Temporary")
-        .any(|path| path.expect("Temporary").path() == target_dir)
+        .map(|path| {
+            path.expect("Temporary")
+                .path()
+                .canonicalize()
+                .expect("Shouldn't panic")
+        })
+        .filter(|path| path.iter().last() == origin_dir.iter().last())
+        .next()
+        .is_some()
     {
+        dbg!("Here");
         return initial_copy(origin_dir, target_dir);
     }
     let target_dir = target_dir.join(origin_dir.iter().last().expect("Temporary"));

@@ -5,12 +5,15 @@ use std::path::{Path, PathBuf};
 use initial_copy::initial_copy;
 use operations::backup_preparations;
 
+use crate::config::exclusions::cache::load_exclusions;
+
 mod initial_copy;
 mod operations;
 mod wrapper;
 
 pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
     let path_target_dir: Box<Path> = target_dir.clone().into();
+    load_exclusions()?;
     // If the target directory is empty is not worth checking the times
     // Just copy it directly
     if !path_target_dir

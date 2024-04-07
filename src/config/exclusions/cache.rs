@@ -8,10 +8,15 @@ const EXCLUSIONS_PATH: &str = r"C:\ProgramData\klone\exclusions.json";
 static mut CACHED_EXCLUSIONS: Vec<String> = Vec::new();
 
 pub fn get_exclusions() -> Result<Vec<String>> {
-    if unsafe { CACHED_EXCLUSIONS.len() != 0 } {
-        return unsafe { Ok(CACHED_EXCLUSIONS.clone()) };
+    if unsafe { CACHED_EXCLUSIONS.len() == 0 } {
+        return Err(Error {
+            kind: ErrorKind::CacheLoadNotCalled,
+        });
     }
+    unsafe { Ok(CACHED_EXCLUSIONS.clone()) }
     // Get the file contents
+}
+pub fn load_exclusions() -> Result<()> {
     let file_contents = std::fs::read_to_string(EXCLUSIONS_PATH).map_err(|_| Error {
         kind: ErrorKind::FSError,
     })?;
@@ -21,5 +26,5 @@ pub fn get_exclusions() -> Result<Vec<String>> {
     unsafe {
         CACHED_EXCLUSIONS = deserialized.clone();
     }
-    Ok(deserialized)
+    Ok(())
 }

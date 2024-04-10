@@ -15,17 +15,23 @@ struct Defaults {
     target: PathBuf,
 }
 fn get_defaults() -> Result<Defaults> {
-    Ok(
-        serde_json::from_str(&std::fs::read_to_string(DEFAULTS_PATH).expect("Temporary"))
-            .expect("Temporary"),
-    )
+    serde_json::from_str(&std::fs::read_to_string(DEFAULTS_PATH).map_err(|_| Error {
+        kind: ErrorKind::FSError,
+    })?)
+    .map_err(|_| Error {
+        kind: ErrorKind::JSONParsingError("defaults".to_string()),
+    })
 }
+/// Returns the default origin stored in the config json file
 pub fn get_default_origin() -> Result<PathBuf> {
-    Ok(get_defaults().expect("Temporary").origin)
+    Ok(get_defaults()?.origin)
 }
+/// Returns the default target stored in the config json file
 pub fn get_default_target() -> Result<PathBuf> {
-    Ok(get_defaults().expect("Temporary").target)
+    Ok(get_defaults()?.target)
 }
+/// Allows to change the default target and origin.   
+/// Must be executed two times in order to change both.  
 pub fn set_defaults(path: String) -> Result<()> {
     if path == "None" {
         return write_defaults(PathBuf::new());
@@ -71,13 +77,18 @@ fn write_defaults(path: PathBuf) -> Result<()> {
     }
     std::fs::write(
         DEFAULTS_PATH,
-        serde_json::to_string(&defaults).expect("Temporary"),
+        serde_json::to_string(&defaults).map_err(|_| Error {
+            kind: ErrorKind::JSONStringifyingError("defaults".to_string()),
+        })?,
     )
-    .expect("Temporary");
+    .map_err(|_| Error {
+        kind: ErrorKind::FSError,
+    })?;
     Ok(())
 }
+/// Prints to stdout the stored defaults
 pub fn print_defaults() -> Result<()> {
-    let defaults = self::get_defaults().expect("Temporary");
+    let defaults = self::get_defaults()?;
     println!("The current defaults:");
     println!("Origin directory: {}", defaults.origin.display());
     println!("Target directory: {}", defaults.target.display());

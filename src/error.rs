@@ -1,9 +1,13 @@
 use std::{error, fmt::{Debug, Display}};
 
+/// Generic `Result<T>` type for the application
 pub type Result<T> = std::result::Result<T, Error>;
+/// The Struct containing the ErrorKind enum
 pub struct Error {
     pub kind: ErrorKind,
 }
+/// The ErrorKind enum that states all possible errors that can happen in the application and 
+/// error messagges that are shown to the user in case those happen
 pub enum ErrorKind {
     DirectoryDoesNotExist(String),
     InvalidOption(String),

@@ -6,9 +6,11 @@ const EXCLUSIONS_PATH: &str = "/etc/klone/exclusions.json";
 const EXCLUSIONS_PATH: &str = r"C:\ProgramData\klone\exclusions.json";
 
 static mut CACHED_EXCLUSIONS: Vec<String> = Vec::new();
-
+/// Returns the Vec with the Strings that contain the exclusions patterns.  
+/// The first time it will be loaded from the JSON file and stored in a static Vector.  
+/// The next time it won't read the file, just returns a clone of the static Vector.  
 pub fn get_exclusions() -> Result<Vec<String>> {
-    if unsafe { CACHED_EXCLUSIONS.is_empty() } {
+    if unsafe { !CACHED_EXCLUSIONS.is_empty() } {
         return unsafe { Ok(CACHED_EXCLUSIONS.clone()) };
     }
     // Get the file contents

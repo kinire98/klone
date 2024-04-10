@@ -16,7 +16,7 @@ const SYS_EXCLUSIONS: &[&str] = &["*/.git", "*.o", "*.bin", "*.lock"];
 struct Exclusions(Vec<String>);
 
 mod cache;
-
+/// Tells if a file or folder is excluded based on the patterns stored in the JSON file
 pub fn is_excluded(pattern: &str) -> Result<bool> {
     let binding = cache::get_exclusions()?;
     let mut iter = binding.iter().filter(|file| {
@@ -27,6 +27,9 @@ pub fn is_excluded(pattern: &str) -> Result<bool> {
     // If there is some, that means that the file should be excluded
     Ok(iter.next().is_some())
 }
+/// Adds the exclusion to the JSON file.  
+/// To see more info about these patterns check the [project's wiki](https://github.com/kinire98/klone/wiki/Exclusions)
+/// or the [glob Pattern Struct documentation](https://docs.rs/glob/latest/glob/struct.Pattern.html)
 pub fn add_exclusion() -> Result<()> {
     // Get the already existing exclusions
     let binding = get_pattern("Add the pattern to exclude: ")?;
@@ -54,7 +57,7 @@ pub fn add_exclusion() -> Result<()> {
     // Store pattern
     deserialized.0.push(pattern.to_string());
     // Write it to the file
-    let _ = std::fs::write(
+    std::fs::write(
         EXCLUSIONS_PATH,
         serde_json::to_string(&deserialized).map_err(|_| Error {
             kind: ErrorKind::JSONStringifyingError("exclusions".to_string()),
@@ -62,9 +65,10 @@ pub fn add_exclusion() -> Result<()> {
     )
     .map_err(|_| Error {
         kind: ErrorKind::FSError,
-    });
+    })?;
     Ok(())
 }
+/// Prints all the exclusions to stdout
 pub fn list_exclusions() -> Result<()> {
     let mut counter = 1;
     // Read file and print it
@@ -84,13 +88,17 @@ pub fn list_exclusions() -> Result<()> {
     });
     Ok(())
 }
+/// Removes exclusions from the JSON file.  
+/// In Windows you won't be able to remote the .git, *.o, *.bin and *.lock files.  
+/// This is because an issue with the Windows file permission system that tells that files that
+/// match these patterns are always blocked and you don't haver permission to work with them.
 pub fn remove_exclusion() -> Result<()> {
     // Binding for getting the info from the file and make the borrow checher happy
     let binding = get_pattern("Introduce the pattern to remove: ")?;
     #[cfg(windows)]
     if SYS_EXCLUSIONS.contains(&binding.as_str()) {
         println!(
-            "You can't remove the .git exclusion in Windows, because an issue with the permissions"
+            "You can't remove the .git, *.o, *.bin and *.lock exclusion in Windows, because an issue with the permissions. Windows tells they are alwaysblockes"
         );
         return Ok(());
     }

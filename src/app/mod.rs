@@ -9,6 +9,7 @@ mod initial_copy;
 mod operations;
 mod wrapper;
 
+/// The function that starts the backup
 pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
     let path_target_dir: Box<Path> = target_dir.clone().into();
     // If the target directory is empty is not worth checking the times

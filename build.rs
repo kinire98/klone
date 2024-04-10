@@ -17,7 +17,7 @@ fn main() {
         program_data.join("defaults.json"),
         format!(
             "{} {:?}:{:?}, {:?}:{:?} {}\n",
-            "{", "origin", "", "target", "", "}"
+            "{", "origin", "None", "target", "None", "}"
         ),
     );
 }
@@ -37,7 +37,7 @@ fn main() {
         "/etc/klone/defaults.json",
         format!(
             "{} {:?}:{:?}, {:?}:{:?} {}\n",
-            "{", "origin", "", "target", "", "}"
+            "{", "origin", "None", "target", "None", "}"
         ),
     );
 }

@@ -22,11 +22,8 @@ pub fn backup(origin_dir: PathBuf, target_dir: PathBuf) -> Result<()> {
                 .canonicalize()
                 .expect("Shouldn't panic")
         })
-        .filter(|path| path.iter().last() == origin_dir.iter().last())
-        .next()
-        .is_some()
+        .any(|path| path.iter().last() == origin_dir.iter().last())
     {
-        dbg!("Here");
         return initial_copy(origin_dir, target_dir);
     }
     let target_dir = target_dir.join(origin_dir.iter().last().expect("Temporary"));

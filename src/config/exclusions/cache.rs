@@ -8,7 +8,7 @@ const EXCLUSIONS_PATH: &str = r"C:\ProgramData\klone\exclusions.json";
 static mut CACHED_EXCLUSIONS: Vec<String> = Vec::new();
 
 pub fn get_exclusions() -> Result<Vec<String>> {
-    if unsafe { CACHED_EXCLUSIONS.len() != 0 } {
+    if unsafe { CACHED_EXCLUSIONS.is_empty() } {
         return unsafe { Ok(CACHED_EXCLUSIONS.clone()) };
     }
     // Get the file contents

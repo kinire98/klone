@@ -4,9 +4,6 @@ use crate::output::cli;
 use std::fs::DirEntry;
 use std::path::PathBuf;
 use std::sync::mpsc::{self, Receiver, Sender};
-use threads_pool::ThreadPool;
-
-static POOL: ThreadPool = ThreadPool::build(num_cpus::get() / 2);
 
 pub fn initial_copy(origin_dir: PathBuf, mut target_dir: PathBuf) -> Result<(), Error> {
     target_dir.push(origin_dir.iter().next_back().unwrap());
@@ -51,18 +48,16 @@ fn copy_operations(
         return start_initial_copy(origin_dir.path(), target_dir, tx);
     }
     std::fs::create_dir_all(&path_target_dir).unwrap();
-    POOL.execute(move || {
-        fs_extra::file::copy(
-            origin_dir.path(),
-            target_dir,
-            &fs_extra::file::CopyOptions {
-                overwrite: true,
-                ..Default::default()
-            },
-        )
-        .map_err(|_| Error {
-            kind: ErrorKind::FSError,
-        });
-    });
+    fs_extra::file::copy(
+        origin_dir.path(),
+        target_dir,
+        &fs_extra::file::CopyOptions {
+            overwrite: true,
+            ..Default::default()
+        },
+    )
+    .map_err(|_| Error {
+        kind: ErrorKind::FSError,
+    })?;
     Ok(())
 }

@@ -15,7 +15,7 @@ const SYS_EXCLUSIONS: &[&str] = &["*/.git", "*.o", "*.bin", "*.lock"];
 #[derive(Serialize, Deserialize, Debug)]
 struct Exclusions(Vec<String>);
 
-pub mod cache;
+mod cache;
 
 pub fn is_excluded(pattern: &str) -> Result<bool> {
     let binding = cache::get_exclusions()?;

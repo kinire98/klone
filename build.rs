@@ -22,6 +22,8 @@ fn main() {
 }
 #[cfg(unix)]
 fn main() {
+    // Not the best for security but, only way I can think of doing this
+
     use nix::unistd::Uid;
     use std::io::Write;
     use std::process::Command;
@@ -59,6 +61,9 @@ fn main() {
             "{", "origin", "None", "target", "None", "}"
         ),
     );
+    let _ = Command::new("sudo")
+        .args(["chmod", "-R", "777", "/etc/klone/"])
+        .output();
     if !Uid::effective().is_root() {
         Command::new("sudo").args([cur_user]).spawn().unwrap();
     }

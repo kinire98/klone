@@ -34,7 +34,7 @@ impl TryFrom<&PathBuf> for UnixFileTime {
                         let _ = OpenOptions::new()
                             .write(true)
                             .create_new(true)
-                            .open(&value.display().to_string())
+                            .open(value.display().to_string())
                             .expect("Temporary");
                     }
                     Ok(UnixFileTime {

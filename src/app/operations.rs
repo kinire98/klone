@@ -27,6 +27,9 @@ fn start_backup(
     target_dir: PathBuf,
     tx: Sender<String>,
 ) -> Result<(), crate::error::Error> {
+    if !origin_dir.is_dir() {
+        return Ok(());
+    }
     for sub_dir in origin_dir.read_dir().unwrap() {
         backup_operations(
             sub_dir.map_err(|_| error::Error {
@@ -34,7 +37,8 @@ fn start_backup(
             })?,
             target_dir.clone(),
             tx.clone(),
-        )?;
+        )
+        .unwrap();
     }
     Ok(())
 }
@@ -50,6 +54,9 @@ fn backup_operations(
     if is_excluded(dir.path().display().to_string().as_str())? {
         return Ok(());
     }
+    if dir.path().is_symlink() {
+        return Ok(());
+    }
     match (
         should_be_backed(
             <&PathBuf as TryInto<OsType>>::try_into(&dir.path())
@@ -57,14 +64,14 @@ fn backup_operations(
             <&PathBuf as TryInto<OsType>>::try_into(&target_file)
                 .expect("Shouldn't panic as, file exists. If so, is an external error"),
         ),
-        dir.path().is_dir(),
+        dir.path().is_dir() || target_file.is_dir(),
     ) {
         // If shouldn't be backed we finish and return
         (false, _) => Ok(()),
         // Should be backed and is a file. We copy the file and return
         (true, false) => {
             // Copy contents
-            tx.send(target_file.display().to_string())
+            tx.send(dir.path().display().to_string())
                 .map_err(|_| error::Error {
                     kind: error::ErrorKind::IOError,
                 })?;
@@ -76,16 +83,17 @@ fn backup_operations(
                     ..Default::default()
                 },
             )
-            .map_err(|_| error::Error {
-                kind: error::ErrorKind::FSError,
-            })?;
+            .unwrap();
+            //           .map_err(|_| error::Error {
+            //               kind: error::ErrorKind::FSError,
+            //           })?;
             Ok(())
         }
         // If should be backed and is a directory we check inside the directory for files to be
         // backed
         (true, true) => {
             //Check inside directory
-            tx.send(target_file.display().to_string())
+            tx.send(dir.path().display().to_string())
                 .map_err(|_| error::Error {
                     kind: error::ErrorKind::IOError,
                 })?;

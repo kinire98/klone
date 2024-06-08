@@ -1,4 +1,7 @@
-use std::{error, fmt::{Debug, Display}};
+use std::{
+    error,
+    fmt::{Debug, Display},
+};
 
 /// Generic `Result<T>` type for the application
 pub type Result<T> = std::result::Result<T, Error>;
@@ -6,7 +9,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub struct Error {
     pub kind: ErrorKind,
 }
-/// The ErrorKind enum that states all possible errors that can happen in the application and 
+/// The ErrorKind enum that states all possible errors that can happen in the application and
 /// error messagges that are shown to the user in case those happen
 pub enum ErrorKind {
     DirectoryDoesNotExist(String),
@@ -40,9 +43,7 @@ impl Display for Error {
             }
             ErrorKind::OperationAbortedByUser => write!(f, "The user ended the operation"),
             ErrorKind::TargetDirMTimeHigherThanOriginDir => {
-                write!(f, 
-                    "The directory where you want to store the backup has a modification time lower than the directory of origin for the backup.\n This means that you modified some data in thetarget directory after the last time you changed some data in the directory of origin."
-                    )
+                write!(f, "The directory where you want to store the backup has a modification time lower than the directory of origin for the backup.\n This means that you modified some data in thetarget directory after the last time you changed some data in the directory of origin.")
             },
             ErrorKind::PatternAlreadyExist => write!(f, "The pattern you introduced already exists"),
             ErrorKind::TargetDirInsideOrigin => write!(f, "The directory where you want to store the backup can't be inside or be a child of the directory to back"),
@@ -66,9 +67,7 @@ impl Debug for Error {
             }
             ErrorKind::OperationAbortedByUser => write!(f, "The user ended the operation"),
             ErrorKind::TargetDirMTimeHigherThanOriginDir => {
-                write!(f, 
-                    "The directory where you want to store the backup has a modification time lower than the directory of origin for the backup.\n This means that you modified some data in thetarget directory after the last time you changed some data in the directory of origin."
-                    )
+                write!(f,"The directory where you want to store the backup has a modification time lower than the directory of origin for the backup.\n This means that you modified some data in thetarget directory after the last time you changed some data in the directory of origin.")
             },
             ErrorKind::PatternAlreadyExist => write!(f, "The pattern you introduced already exists"),
             ErrorKind::TargetDirInsideOrigin => write!(f, "The directory where you want to store the backup can't be inside or be a child of the directory to back"),
@@ -76,7 +75,6 @@ impl Debug for Error {
         }
     }
 }
-
 
 impl error::Error for Error {
     fn cause(&self) -> Option<&dyn error::Error> {

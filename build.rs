@@ -1,7 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
-#[cfg(unix)]
-use std::process::Command;
+
 #[cfg(windows)]
 fn main() {
     let program_data = PathBuf::from("C:\\ProgramData\\klone");
@@ -23,10 +22,30 @@ fn main() {
 }
 #[cfg(unix)]
 fn main() {
-    // Not the best for security but, only way I can think of doing this
-    // TODO Checks if the files exist
+    use nix::unistd::Uid;
+    use std::io::Write;
+    use std::process::Command;
     if PathBuf::from("/etc/klone/").is_dir() {
         return;
+    }
+    let cur_user: String = String::from_utf8(
+        Command::new("who | cut -d' ' -f1")
+            .stdout(std::process::Stdio::piped())
+            .output()
+            .unwrap()
+            .stdout,
+    )
+    .unwrap();
+    if !Uid::effective().is_root() {
+        let mut input = String::new();
+        print!("Enter sudo password to create the app configuration: ");
+        std::io::stdout().flush().unwrap();
+        std::io::stdin().read_line(&mut input).unwrap();
+        let command = Command::new("sudo su")
+            .stdin(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+        write!(command.stdin.unwrap(), "{}", input).unwrap();
     }
     let _ = Command::new("sudo").args(["mkdir", "/etc/klone"]).output();
     let _ = Command::new("sudo")
@@ -40,4 +59,7 @@ fn main() {
             "{", "origin", "None", "target", "None", "}"
         ),
     );
+    if !Uid::effective().is_root() {
+        Command::new("sudo").args([cur_user]).spawn().unwrap();
+    }
 }

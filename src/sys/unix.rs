@@ -1,6 +1,7 @@
 use crate::error::{Error, ErrorKind};
 use fs_extra::dir::create_all;
 use std::fs;
+use std::fs::OpenOptions;
 use std::io;
 use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
@@ -27,9 +28,17 @@ impl TryFrom<&PathBuf> for UnixFileTime {
             }),
             Err(err) => match err.kind() {
                 io::ErrorKind::NotFound => {
-                    create_all(value, false).unwrap();
+                    if !value.is_file() && !value.is_symlink() {
+                        create_all(value, false).unwrap();
+                    } else if value.is_file() {
+                        let _ = OpenOptions::new()
+                            .write(true)
+                            .create_new(true)
+                            .open(&value.display().to_string())
+                            .expect("Temporary");
+                    }
                     Ok(UnixFileTime {
-                        creation_time: fs::metadata(value).unwrap().mtime(),
+                        creation_time: fs::metadata(value).expect("Checked").mtime(),
                         just_created: true,
                     })
                 }

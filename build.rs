@@ -33,6 +33,8 @@ fn main() {
     }
     let cur_user = env!("USER");
     if !Uid::effective().is_root() {
+        let cur_user = env!("USER");
+        println!("{:?}", cur_user);
         let mut input = String::new();
         print!("Enter sudo password to create the app configuration: ");
         std::io::stdout().flush().unwrap();

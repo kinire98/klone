@@ -25,13 +25,13 @@ fn main() {
     // Not the best for security but, only way I can think of doing this
 
     use nix::unistd::Uid;
+    use std::env;
     use std::io::Write;
     use std::process::Command;
     if PathBuf::from("/etc/klone/").is_dir() {
         return;
     }
-    let cur_user: String =
-        String::from_utf8(Command::new("who | cut -d' ' -f1").output().unwrap().stdout).unwrap();
+    let cur_user = env!("USER");
     if !Uid::effective().is_root() {
         let mut input = String::new();
         print!("Enter sudo password to create the app configuration: ");

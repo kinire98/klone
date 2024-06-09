@@ -1,6 +1,7 @@
 use crate::config::exclusions::is_excluded;
 use crate::error::{Error, ErrorKind};
 use crate::output::cli;
+use core::panic;
 use std::fs::DirEntry;
 use std::path::PathBuf;
 use std::process::Command;
@@ -78,7 +79,7 @@ fn copy_operations(
         Err(error) => match error.kind {
             fs_extra::error::ErrorKind::NotFound => (),
             _ => {
-                Err::<(), fs_extra::error::Error>(error).unwrap();
+                panic!("{}", error);
             }
         },
     }

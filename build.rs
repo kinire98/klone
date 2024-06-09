@@ -30,14 +30,8 @@ fn main() {
     if PathBuf::from("/etc/klone/").is_dir() {
         return;
     }
-    let cur_user: String = String::from_utf8(
-        Command::new("who | cut -d' ' -f1")
-            .stdout(std::process::Stdio::piped())
-            .output()
-            .unwrap()
-            .stdout,
-    )
-    .unwrap();
+    let cur_user: String =
+        String::from_utf8(Command::new("who | cut -d' ' -f1").output().unwrap().stdout).unwrap();
     if !Uid::effective().is_root() {
         let mut input = String::new();
         print!("Enter sudo password to create the app configuration: ");

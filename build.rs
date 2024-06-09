@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
-
+#[cfg(unix)]
+use std::process::Command;
 #[cfg(windows)]
 fn main() {
     let program_data = PathBuf::from("C:\\ProgramData\\klone");
@@ -23,25 +24,13 @@ fn main() {
 #[cfg(unix)]
 fn main() {
     // Not the best for security but, only way I can think of doing this
-
-    use nix::unistd::Uid;
-    use std::env;
-    use std::io::Write;
-    use std::process::Command;
+    // TODO Checks if the files exist
     if PathBuf::from("/etc/klone/").is_dir() {
         return;
     }
-    let cur_user = env!("USER");
-    if !Uid::effective().is_root() {
-        let cur_user = env!("USER");
-        println!("{:?}", cur_user);
-        let mut input = String::new();
-        print!("Enter sudo password to create the app configuration: ");
-        std::io::stdout().flush().unwrap();
-        std::io::stdin().read_line(&mut input).unwrap();
-        let command = Command::new("sudo su").spawn().unwrap();
-        write!(command.stdin.unwrap(), "{}", input).unwrap();
-    }
+    let mut input = String::new();
+    println!("Enter sudo password to create the neccesary files for the app to ");
+    std::io::stdin().read_line(&mut input).unwrap();
     let _ = Command::new("sudo").args(["mkdir", "/etc/klone"]).output();
     let _ = Command::new("sudo")
         .args(["chmod", "-R", "777", "/etc/klone/"])
@@ -54,10 +43,4 @@ fn main() {
             "{", "origin", "None", "target", "None", "}"
         ),
     );
-    let _ = Command::new("sudo")
-        .args(["chmod", "-R", "777", "/etc/klone/"])
-        .output();
-    if !Uid::effective().is_root() {
-        Command::new("sudo").args([cur_user]).spawn().unwrap();
-    }
 }

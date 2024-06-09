@@ -37,10 +37,7 @@ fn main() {
         print!("Enter sudo password to create the app configuration: ");
         std::io::stdout().flush().unwrap();
         std::io::stdin().read_line(&mut input).unwrap();
-        let command = Command::new("sudo su")
-            .stdin(std::process::Stdio::piped())
-            .spawn()
-            .unwrap();
+        let command = Command::new("sudo su").spawn().unwrap();
         write!(command.stdin.unwrap(), "{}", input).unwrap();
     }
     let _ = Command::new("sudo").args(["mkdir", "/etc/klone"]).output();

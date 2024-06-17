@@ -67,9 +67,15 @@ fn backup_operations(
         dir.path().is_dir() || target_file.is_dir(),
     ) {
         // If shouldn't be backed we finish and return
-        (false, _) => Ok(()),
+        (false, _) => {
+            println!("doesnt");
+            Ok(())}
+        ,
         // Should be backed and is a file. We copy the file and return
         (true, false) => {
+            println!("Should be here");
+            println!("{:?}, \n{}", dir.path().display(), dir.path().is_dir());
+            println!("{:?}\n {}", &target_file, target_file.is_dir());
             // Copy contents
             tx.send(dir.path().display().to_string())
                 .map_err(|_| error::Error {

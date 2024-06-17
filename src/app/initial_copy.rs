@@ -4,7 +4,6 @@ use crate::output::cli;
 use core::panic;
 use std::fs::DirEntry;
 use std::path::PathBuf;
-use std::process::Command;
 use std::sync::mpsc::{self, Receiver, Sender};
 
 pub fn initial_copy(origin_dir: PathBuf, mut target_dir: PathBuf) -> Result<(), Error> {
@@ -46,27 +45,25 @@ fn copy_operations(
     if origin_dir.path().is_symlink() {
         return Ok(());
     }
-    tx.send(target_dir.display().to_string())
+    tx.send(origin_dir.path().display().to_string())
         .map_err(|_| Error {
             kind: ErrorKind::IOError,
         })?;
     if origin_dir.path().is_dir() {
+        dbg!(origin_dir.path().display());
         match std::fs::create_dir_all(&target_dir) {
-            Ok(_) => (),
+            Ok(()) => (),
             Err(err) => match err.kind() {
                 std::io::ErrorKind::PermissionDenied => {
-                    #[cfg(windows)]
-                    panic!("It seems some files in your directory need administrator privileges. Start the console with adming privileges and rerun this");
-                    #[cfg(unix)]
-                    Command::new("sudo su");
-                    std::fs::create_dir_all(&target_dir).unwrap();
+                    return Err(Error {
+                        kind: ErrorKind::PermissionDenied,
+                    })
                 }
                 _ => (),
             },
         }
         return start_initial_copy(origin_dir.path(), target_dir, tx);
     }
-    std::fs::create_dir_all(&path_target_dir).unwrap();
     match fs_extra::file::copy(
         origin_dir.path(),
         target_dir,
@@ -78,9 +75,7 @@ fn copy_operations(
         Ok(_) => (),
         Err(error) => match error.kind {
             fs_extra::error::ErrorKind::NotFound => (),
-            _ => {
-                panic!("{}", error);
-            }
+            _ => panic!("{:?}", error),
         },
     }
     Ok(())

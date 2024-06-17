@@ -1,7 +1,6 @@
 use crate::error::{Error, ErrorKind};
 use fs_extra::dir::create_all;
 use std::fs;
-use std::fs::OpenOptions;
 use std::io;
 use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
@@ -20,6 +19,9 @@ impl super::File for UnixFileTime {
 }
 impl TryFrom<&PathBuf> for UnixFileTime {
     type Error = crate::error::Error;
+    // If a folder has an extension will be created as file (No problem with this)
+    // If a file doesn't have it it will be created as folder (Half problem with this. Files with
+    // no extension are the ones users don't usually work with)
     fn try_from(value: &PathBuf) -> Result<Self, Self::Error> {
         match fs::metadata(value) {
             Ok(file_metadata) => Ok(UnixFileTime {
@@ -28,14 +30,13 @@ impl TryFrom<&PathBuf> for UnixFileTime {
             }),
             Err(err) => match err.kind() {
                 io::ErrorKind::NotFound => {
-                    if !value.is_file() && !value.is_symlink() {
-                        create_all(value, false).unwrap();
-                    } else if value.is_file() {
-                        let _ = OpenOptions::new()
-                            .write(true)
-                            .create_new(true)
-                            .open(value.display().to_string())
-                            .expect("Temporary");
+                    match value.extension() {
+                        None => {
+                            create_all(value, false).unwrap();
+                        }
+                        Some(_) => {
+                            create_file(value)?;
+                        }
                     }
                     Ok(UnixFileTime {
                         creation_time: fs::metadata(value).expect("Checked").mtime(),
@@ -47,5 +48,19 @@ impl TryFrom<&PathBuf> for UnixFileTime {
                 }),
             },
         }
+    }
+}
+fn create_file(path: &PathBuf) -> Result<(), Error> {
+    if let Err(err) = fs::write(path, "") {
+        println!("File");
+        match err.kind() {
+            io::ErrorKind::PermissionDenied => Err(Error {
+                kind: ErrorKind::PermissionDenied,
+            }),
+            io::ErrorKind::AlreadyExists => Ok(()),
+            _ => panic!("{:?}", err),
+        }
+    } else {
+        Ok(())
     }
 }

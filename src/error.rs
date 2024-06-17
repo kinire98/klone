@@ -24,6 +24,7 @@ pub enum ErrorKind {
     OperationAbortedByUser,
     PatternAlreadyExist,
     TargetDirInsideOrigin,
+    PermissionDenied,
     UndefinedError,
 }
 
@@ -47,6 +48,7 @@ impl Display for Error {
             },
             ErrorKind::PatternAlreadyExist => write!(f, "The pattern you introduced already exists"),
             ErrorKind::TargetDirInsideOrigin => write!(f, "The directory where you want to store the backup can't be inside or be a child of the directory to back"),
+            ErrorKind::PermissionDenied => write!(f, "Make sure you have the correct permissions to read and write in both folders"),
             ErrorKind::UndefinedError => write!(f, "An undefined error has ocurred"),
         }
     }
@@ -71,6 +73,7 @@ impl Debug for Error {
             },
             ErrorKind::PatternAlreadyExist => write!(f, "The pattern you introduced already exists"),
             ErrorKind::TargetDirInsideOrigin => write!(f, "The directory where you want to store the backup can't be inside or be a child of the directory to back"),
+            ErrorKind::PermissionDenied => write!(f, "Make sure you have the correct permissions to read and write in both folders"),
             ErrorKind::UndefinedError => write!(f, "An undefined error has ocurred"),
         }
     }

@@ -60,10 +60,10 @@ fn create_file(path: &PathBuf) -> Result<(), Error> {
     if let Err(err) = fs::write(path, "") {
         println!("File");
         match err.kind() {
-            io::ErrorKind::PermissionDenied => Err(Error {
+            std::io::ErrorKind::PermissionDenied => Err(Error {
                 kind: ErrorKind::PermissionDenied,
             }),
-            io::ErrorKind::AlreadyExists => Ok(()),
+            std::io::ErrorKind::AlreadyExists => Ok(()),
             _ => panic!("{:?}", err),
         }
     } else {

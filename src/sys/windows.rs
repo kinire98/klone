@@ -28,7 +28,14 @@ impl TryFrom<&PathBuf> for WindowsFileTime {
             Ok(time) => time,
             Err(err) => match err.kind() {
                 std::io::ErrorKind::NotFound => {
-                    create_all(value, false).unwrap();
+                    match value.extension() {
+                        None => {
+                            create_all(value, false).unwrap();
+                        }
+                        Some(_) => {
+                            create_file(value)?;
+                        }
+                    }
                     return Ok(WindowsFileTime {
                         time: fs::metadata(value).unwrap().last_write_time(),
                         just_created: true,
@@ -47,5 +54,19 @@ impl TryFrom<&PathBuf> for WindowsFileTime {
             is_folder: value.is_dir(),
             just_created: false,
         })
+    }
+}
+fn create_file(path: &PathBuf) -> Result<(), Error> {
+    if let Err(err) = fs::write(path, "") {
+        println!("File");
+        match err.kind() {
+            io::ErrorKind::PermissionDenied => Err(Error {
+                kind: ErrorKind::PermissionDenied,
+            }),
+            io::ErrorKind::AlreadyExists => Ok(()),
+            _ => panic!("{:?}", err),
+        }
+    } else {
+        Ok(())
     }
 }
